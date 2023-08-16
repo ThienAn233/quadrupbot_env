@@ -240,9 +240,9 @@ class Quadrup_env():
         return [speed, align, high, surv, force]
     
     
-env = Quadrup_env(render_mode='human')             
-for _ in range(1000):
-    action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
-    obs, rew, inf = env.sim(action)
-    print(obs.shape,rew.shape,inf.shape)
-env.close()
+# env = Quadrup_env(render_mode='human')             
+# for _ in range(1000):
+#     action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
+#     obs, rew, inf = env.sim(action)
+#     print(obs.shape,rew.shape,inf.shape)
+# env.close()
