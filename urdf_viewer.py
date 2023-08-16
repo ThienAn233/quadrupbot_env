@@ -62,7 +62,8 @@ while True:
                                 positionGains = np.ones_like(temp_debug_value)*.5,
                                 # velocityGains = np.ones_like(temp_debug_value)*0.,        
                                 )
-    p.resetBasePositionAndOrientation(robotId,[0.,0.,initial_height],initial_ori)
+    # p.resetBasePositionAndOrientation(robotId,[0.,0.,initial_height],initial_ori)
+    base_inf =  p.getBasePositionAndOrientation(robotId)
     previous_pos = np.array(temp_debug_value)
+    print(f'robot height: {base_inf[0][-1]}')
     t.sleep(sleep_time)
-    
