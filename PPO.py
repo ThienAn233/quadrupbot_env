@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 class PPO_quad():
     def __init__(
         self,
-        PATH                = 'quadrupbot_env//',
+        PATH                = 'quadrupbot_env\\',
         load_model          = None,
         envi                = qe,
         log_data            = True,
@@ -65,8 +65,8 @@ class PPO_quad():
         
         # Load model path and device
         if load_model:
-            self.model_path = PATH + '//models//PPO//' + load_model
-            self.optim_path = PATH + '//models//PPO//' + load_model + '_optim'
+            self.model_path = PATH + '\\models\\PPO\\' + load_model
+            self.optim_path = PATH + '\\models\\PPO\\' + load_model + '_optim'
         if self.device:
             pass
         else:
@@ -150,7 +150,7 @@ class PPO_quad():
         
         # Tensor board
         if self.log_data:
-            self.writer = SummaryWriter(PATH + '//runs//PPO//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
+            self.writer = SummaryWriter(PATH + '\\runs\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
     
     
     def get_actor_critic_action_and_values(self,obs,eval=True):
