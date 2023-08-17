@@ -55,16 +55,16 @@ class Quadrup_env():
         p.setGravity(*self.g, physicsClientId = self.physicsClient)
         self.get_init_pos()
         for pos in self.corr_list:
-            self.robotId_list.append(p.loadURDF(self.robot_file, physicsClientId = self.physicsClient,basePosition=pos,baseOrientation=[0,0,0,1]))
+            self.robotId_list      += [p.loadURDF(self.robot_file, physicsClientId = self.physicsClient,basePosition=pos,baseOrientation=[0,0,0,1])]
         self.sample_terrain()
-        self.number_of_joints = p.getNumJoints(self.robotId_list[0], physicsClientId = self.physicsClient)
+        self.number_of_joints       = p.getNumJoints(self.robotId_list[0], physicsClientId = self.physicsClient)
         for jointIndex in range(0,self.number_of_joints):
             data = p.getJointInfo(self.robotId_list[0], jointIndex, physicsClientId = self.physicsClient)
-            self.jointId_list.append(data[0])                                                                                # Create list to store joint's Id
-            self.jointName_list.append(str(data[1]))                                                                         # Create list to store joint's Name
-            self.jointRange_list.append((data[8],data[9]))                                                                   # Create list to store joint's Range
-            self.jointMaxForce_list.append(data[10])                                                                         # Create list to store joint's max Force
-            self.jointMaxVeloc_list.append(data[11])                                                                         # Create list to store joint's max Velocity
+            self.jointId_list      += [data[0]]                                                                          # Create list to store joint's Id
+            self.jointName_list    += [str(data[1])]                                                                     # Create list to store joint's Name
+            self.jointRange_list   += [(data[8],data[9])]                                                                # Create list to store joint's Range
+            self.jointMaxForce_list+= [data[10]]                                                                         # Create list to store joint's max Force
+            self.jointMaxVeloc_list+= [data[11]]                                                                         # Create list to store joint's max Velocity
             print(f'Id: {data[0]}, Name: {str(data[1])}, Range: {(data[8],data[9])}')
         self.robotBaseMassandFriction = [p.getDynamicsInfo(self.robotId_list[0],-1,physicsClientId = self.physicsClient)[0], p.getDynamicsInfo(self.robotId_list[0],self.jointId_list[-1],physicsClientId = self.physicsClient)[1]]
         print(f'Robot mass: {self.robotBaseMassandFriction[0]} and friction on feet: {self.robotBaseMassandFriction[1]}')
@@ -232,17 +232,19 @@ class Quadrup_env():
         high = -100*(-obs[1]+.2) if obs[1]<.2 else 0
         
         # Reward for surviving 
-        surv = 30
+        surv = 10
         
         # Reward for minimal force
         force = (-1e-5)*((self.reaction_force[robotId,:]**2).sum())
 
         return [speed, align, high, surv, force]
     
-    
+# # TEST CODE # # #
 # env = Quadrup_env(render_mode='human')             
 # for _ in range(1000):
 #     action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
 #     obs, rew, inf = env.sim(action)
+#     # t.sleep(.5)
 #     print(obs.shape,rew.shape,inf.shape)
+#     print(env.time_steps_in_current_episode)
 # env.close()
