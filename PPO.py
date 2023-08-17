@@ -297,17 +297,17 @@ class custom_dataset(Dataset):
         return self.local_return   
     
 # # TEST CODE # # #
-trainer = PPO_quad(
-                num_robot = 9,
-                learning_rate = 1e-4,
-                data_size = 10,
-                batch_size = 1,
-                epochs=100,
-                thresh=1,
-                explore = 1e-2,
-                epsilon = 0.2,
-                log_data = True,
-                save_model = True,
-                render_mode= False
-                )
-trainer.train()
+# trainer = PPO_quad(
+#                 num_robot = 9,
+#                 learning_rate = 1e-4,
+#                 data_size = 10,
+#                 batch_size = 1,
+#                 epochs=100,
+#                 thresh=1,
+#                 explore = 1e-2,
+#                 epsilon = 0.2,
+#                 log_data = True,
+#                 save_model = True,
+#                 render_mode= False
+#                 )
+# trainer.train()
