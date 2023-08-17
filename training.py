@@ -1,5 +1,11 @@
+import os
 import PPO
 import quad_environment as qa
+
+# Open tensor board
+os.popen('tensorboard --logdir=quadrupbot_env\\runs')
+
+# Run training code
 trainer = PPO.PPO_quad(
     num_robot       = 9,
     learning_rate   =1e-4,
