@@ -32,7 +32,8 @@ class PPO_quad():
         mlp                 = None,
         action_space        = 12,
         observation_space   = 36,
-        device              = None
+        device              = None,
+        norm                = True
         ):
         
         
@@ -57,6 +58,7 @@ class PPO_quad():
         self.action_space       = action_space     
         self.observation_space  = observation_space
         self.device             = device
+        self.norm               = norm
         
         # Setup random seed
         torch.manual_seed(self.seed)
@@ -126,17 +128,21 @@ class PPO_quad():
         print('params: ',sum(i.numel() for i in self.mlp.parameters()) )
         
         # Normalize the return and obs
-        self.mlp.eval()
-        temp_size = 1000
-        with torch.no_grad():
-                data = self.get_data_from_env(temp_size)
-        data = custom_dataset(data,temp_size,self.num_robot,self.gamma)
-        self.qua_var_mean = torch.var_mean(data.local_return,dim=0)
-        self.val_var_mean = torch.var_mean(data.local_values,dim=0)
-        # sns.kdeplot(data=data.local_action.squeeze())
-        # plt.show()
-        print(f'quality var mean: {self.qua_var_mean}')
-        print(f'values var mean: {self.val_var_mean}')
+        if self.norm:
+            self.mlp.eval()
+            temp_size = 1000
+            with torch.no_grad():
+                    data = self.get_data_from_env(temp_size)
+            data = custom_dataset(data,temp_size,self.num_robot,self.gamma)
+            self.qua_var_mean = torch.var_mean(data.local_return,dim=0)
+            self.val_var_mean = torch.var_mean(data.local_values,dim=0)
+            # sns.kdeplot(data=data.local_action.squeeze())
+            # plt.show()
+            print(f'quality var mean: {self.qua_var_mean}')
+            print(f'values var mean: {self.val_var_mean}')
+        else:
+            self.qua_var_mean = (1.,0.)
+            self.val_var_mean = (1.,0.)
         
         # Optim setup
         self.mlp_optimizer = torch.optim.Adam(self.mlp.parameters(),lr = self.learning_rate)
