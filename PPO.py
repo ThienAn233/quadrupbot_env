@@ -247,7 +247,7 @@ class PPO_quad():
                     if (quality.mean().item()>best_reward and quality.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
                         best_reward = quality.mean().item()
                         torch.save(mlp.state_dict(), self.PATH+'models\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
-                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'optim')
+                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
                         print('saved at: '+str(round(quality.mean().item(),2)))
                 
                 # logging info

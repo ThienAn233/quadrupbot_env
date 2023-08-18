@@ -101,7 +101,7 @@ class Quadrup_env():
         p.changeDynamics(robotId,-1,new_mass)
         # Sample new feet friction
         new_friction= self.robotBaseMassandFriction[1] + np.random.uniform(*self.initialFriction)
-        for i in (3,7):
+        for i in (2,5,8,11):
             p.changeDynamics(robotId,i,lateralFriction=new_friction)
         for jointId in self.jointId_list:
             p.resetJointState(bodyUniqueId=robotId,jointIndex=jointId,targetValue=0,targetVelocity=0,physicsClientId=self.physicsClient)

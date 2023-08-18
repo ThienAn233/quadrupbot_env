@@ -2,6 +2,7 @@ import PPO
 import quad_environment as qa
 
 eval = PPO.PPO_quad(
+    load_model      ='2023-08-18-22-28-14',
     num_robot       = 9,
     learning_rate   =0,
     data_size       =500,
