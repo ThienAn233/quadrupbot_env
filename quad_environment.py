@@ -6,12 +6,13 @@ import time as t
 class Quadrup_env():
     def __init__(
         self,
-        max_length  = 500,
-        num_step    = 10,
-        render_mode = None,
-        robot_file  = 'quadrupbot_env\\quadrup.urdf',
-        num_robot   = 9,
-        seed        = 0,
+        max_length      = 500,
+        num_step        = 10,
+        render_mode     = None,
+        robot_file      = 'quadrupbot_env\\quadrup.urdf',
+        num_robot       = 9,
+        terrainHeight   = [0., 0.05],
+        seed            = 0,
     ):
         
         # Configurable variables
@@ -28,7 +29,7 @@ class Quadrup_env():
         self.initialMass        = [0, 1.]
         self.initialPos         = [0, .1]
         self.initialFriction    = [0, .3]
-        self.terrainHeight      = [0, .05]
+        self.terrainHeight      = terrainHeight
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937 + self.terrainHeight[-1]
         self.robotId_list       = []
@@ -47,6 +48,8 @@ class Quadrup_env():
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         self.terrain_shape  = [10, self.num_robot]
+        self.feet_list = [2,5,8,11]
+        self.base_pos = []
         
         # Setup the environment
         print('-'*100)
@@ -101,7 +104,7 @@ class Quadrup_env():
         p.changeDynamics(robotId,-1,new_mass)
         # Sample new feet friction
         new_friction= self.robotBaseMassandFriction[1] + np.random.uniform(*self.initialFriction)
-        for i in (2,5,8,11):
+        for i in self.feet_list:
             p.changeDynamics(robotId,i,lateralFriction=new_friction)
         for jointId in self.jointId_list:
             p.resetJointState(bodyUniqueId=robotId,jointIndex=jointId,targetValue=0,targetVelocity=0,physicsClientId=self.physicsClient)
@@ -129,8 +132,8 @@ class Quadrup_env():
         temp_obs_value = []
         # Get cordinate in robot reference 
         base_position, base_orientation =  p.getBasePositionAndOrientation(robotId, physicsClientId = self.physicsClient)[:2]
-        base_position = [-base_position[1]+self.corr_list[robotId][1]] + [base_position[-1]]
-        temp_obs_value += [ *base_position,*base_orientation]
+        self.base_pos = [-base_position[1]+self.corr_list[robotId][1]] + [base_position[-1]]
+        temp_obs_value += [ *base_orientation]
         # Get base linear and angular velocity
         linear_velo, angular_velo = p.getBaseVelocity(robotId, physicsClientId = self.physicsClient)
         temp_obs_value += [*linear_velo, *angular_velo]
@@ -147,16 +150,29 @@ class Quadrup_env():
         return temp_obs_value
 
 
+    def get_contact_values(self,robotId):
+        temp_obs_vaule = []
+        for link in self.feet_list:
+            if p.getContactPoints(robotId,self.terrainId,link):
+                temp_obs_vaule += [1.]
+            else:
+                temp_obs_vaule += [0.]
+        return temp_obs_vaule
+    
+
     def get_all_obs(self,robotId):
         temp_obs_value = []
         # Base position state
         base_info = self.get_distance_and_ori_and_velocity_from_target(robotId)
         # Joints state
         joints_info = self.get_joints_values(robotId)
+        # Contact state
+        contact_info = self.get_contact_values(robotId)
         # Full observation
         temp_obs_value += [
                         *base_info,
                         *joints_info,
+                        *contact_info
                         ]
         return temp_obs_value
     
@@ -172,7 +188,7 @@ class Quadrup_env():
             temp_obs_value += [self.get_all_obs(robotId)]
             # GET INFO
             if train:
-                temp_info += [self.auto_reset(robotId,temp_obs_value[-1])]
+                temp_info += [self.auto_reset(robotId)]
             # GET REWARD
             temp_reward_value += [self.get_reward_value(temp_obs_value[-1],robotId)]
         return np.array(temp_obs_value), np.array(temp_reward_value), np.array(temp_info)
@@ -182,8 +198,8 @@ class Quadrup_env():
         return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (self.target_height[0] > height) | (np.abs(dir)>0.25)
     
     
-    def auto_reset(self,robotId,obs):
-        height, dir = obs[1], obs[0]
+    def auto_reset(self,robotId):
+        height, dir = self.base_pos[1], self.base_pos[0]
         truncation = self.truncation_check(height,dir,robotId)
         if truncation:
             self.sample_target(robotId)
@@ -222,14 +238,13 @@ class Quadrup_env():
     
     def get_reward_value(self,obs,robotId):
         # Reward for high speed in x direction
-        speed = 10*obs[6]
+        speed = 25*obs[4]
 
         # Reward for being in good y direction
-        align = -50*obs[0]**2
-        # -10*obs[0]**2
+        align = -50*self.base_pos[0]**2
         
         # Reward for being high
-        high = -100*(-obs[1]+.2) if obs[1]<.2 else 0
+        high = -100*(-self.base_pos[1]+.28) if self.base_pos[1]<.28 else 0
         
         # Reward for surviving 
         surv = 10
@@ -239,12 +254,15 @@ class Quadrup_env():
 
         return [speed, align, high, surv, force]
     
-# # TEST CODE # # #
-# env = Quadrup_env(render_mode='human')             
+# # # TEST CODE # # #
+# env = Quadrup_env(render_mode='human',num_robot=2,terrainHeight=[0.,0.])             
 # for _ in range(1000):
 #     action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
 #     obs, rew, inf = env.sim(action)
 #     # t.sleep(.5)
 #     print(obs.shape,rew.shape,inf.shape)
-#     print(env.time_steps_in_current_episode)
+#     # print(env.time_steps_in_current_episode)
+#     # print(obs[0])
+#     # print(rew[0])
+#     # print(inf[0])
 # env.close()

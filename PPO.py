@@ -31,9 +31,10 @@ class PPO_quad():
         seed                = 1107,
         mlp                 = None,
         action_space        = 12,
-        observation_space   = 36,
+        observation_space   = 38,
         device              = None,
-        norm                = True
+        norm                = True,
+        terrain_height      = [0, 0.05]
         ):
         
         
@@ -59,6 +60,7 @@ class PPO_quad():
         self.observation_space  = observation_space
         self.device             = device
         self.norm               = norm
+        self.terrain_height     = terrain_height
         
         # Setup random seed
         torch.manual_seed(self.seed)
@@ -76,7 +78,7 @@ class PPO_quad():
         print('Using device: ', self.device)
         
         # Setup env
-        self.env = envi.Quadrup_env(num_robot=self.num_robot,render_mode=self.render_mode)
+        self.env = envi.Quadrup_env(num_robot=self.num_robot,render_mode=self.render_mode,terrainHeight=self.terrain_height)
         print('env is ready!')
         print(f'action space of {num_robot} robot is: {action_space}')
         print(f'observation sapce of {num_robot} robot is: {observation_space}')
@@ -302,7 +304,7 @@ class custom_dataset(Dataset):
                 self.local_return[i] = self.reward[i] + self.isnt_end(i)*self.gamma*self.local_return[i+1]
         return self.local_return   
     
-# # TEST CODE # # #
+# # # TEST CODE # # #
 # trainer = PPO_quad(
 #                 num_robot = 9,
 #                 learning_rate = 1e-4,
