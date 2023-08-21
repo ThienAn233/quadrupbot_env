@@ -27,7 +27,7 @@ class PPO_quad():
         epochs              = 500,
         data_size           = 1000,
         batch_size          = 5000,
-        reward_index        = np.array([[1, 1, 1, 1, 1]]),
+        reward_index        = np.array([[1, 1, 1, 1, 1, 1]]),
         seed                = 1107,
         mlp                 = None,
         action_space        = 12,

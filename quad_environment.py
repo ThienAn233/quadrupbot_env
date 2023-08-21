@@ -77,8 +77,9 @@ class Quadrup_env():
                 p.enableJointForceTorqueSensor(robotId,joints,True,physicsClientId = self.physicsClient)
             self.sample_target(robotId)
         print(f'Robot position loaded, force/torque sensors enable')
-        self.previous_pos = np.zeros((self.num_robot,len(self.jointId_list)))
+        self.previous_pos   = np.zeros((self.num_robot,len(self.jointId_list)))
         self.reaction_force = np.zeros((self.num_robot,len(self.jointId_list),3))
+        self.contact_force  = np.zeros((self.num_robot,len(self.feet_list))) 
         print('-'*100) 
         
     
@@ -152,11 +153,13 @@ class Quadrup_env():
 
     def get_contact_values(self,robotId):
         temp_obs_vaule = []
-        for link in self.feet_list:
+        for i, link in enumerate(self.feet_list):
             if p.getContactPoints(robotId,self.terrainId,link):
                 temp_obs_vaule += [1.]
+                self.contact_force[robotId,i] = p.getContactPoints(robotId,self.terrainId,link)[0][9]
             else:
                 temp_obs_vaule += [0.]
+                self.contact_force[robotId,i] = 0.
         return temp_obs_vaule
     
 
@@ -250,19 +253,21 @@ class Quadrup_env():
         surv = 10
         
         # Reward for minimal force
-        force = (-1e-5)*((self.reaction_force[robotId,:]**2).sum())
+        force = (-1e-4)*((self.reaction_force[robotId,:]**2).sum())
 
-        return [speed, align, high, surv, force]
+        # Reward for minimal contact force
+        contact =(-1e-4)*((self.contact_force[robotId,:]**2)).sum()
+        return [speed, align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
 # env = Quadrup_env(render_mode='human',num_robot=2,terrainHeight=[0.,0.])             
 # for _ in range(1000):
 #     action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
 #     obs, rew, inf = env.sim(action)
-#     # t.sleep(.5)
+#     t.sleep(.5)
 #     print(obs.shape,rew.shape,inf.shape)
-#     # print(env.time_steps_in_current_episode)
-#     # print(obs[0])
-#     # print(rew[0])
-#     # print(inf[0])
+#     print(env.time_steps_in_current_episode)
+#     print(obs[0])
+#     print(rew[0])
+#     print(inf[0])
 # env.close()
