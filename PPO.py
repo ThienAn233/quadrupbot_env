@@ -22,6 +22,7 @@ class PPO_quad():
         epsilon             = 0.2,
         explore             = 1e-4,
         gamma               = .99,
+        zeta                = .5,
         learning_rate       = 1e-4,
         num_robot           = 9,
         epochs              = 500,
@@ -34,7 +35,10 @@ class PPO_quad():
         observation_space   = 38,
         device              = None,
         norm                = True,
-        terrain_height      = [0, 0.05]
+        terrain_height      = [0, 0.05],
+        print_rew           = False,
+        real_time           = False,
+        train_               = True,
         ):
         
         
@@ -48,6 +52,7 @@ class PPO_quad():
         self.epsilon            = epsilon
         self.explore            = explore
         self.gamma              = gamma 
+        self.zeta               = zeta
         self.learning_rate      = learning_rate 
         self.num_robot          = num_robot        
         self.epochs             = epochs
@@ -61,6 +66,9 @@ class PPO_quad():
         self.device             = device
         self.norm               = norm
         self.terrain_height     = terrain_height
+        self.print_rew          = print_rew
+        self.real_time          = real_time
+        self.train_             = train_
         
         # Setup random seed
         torch.manual_seed(self.seed)
@@ -97,7 +105,7 @@ class PPO_quad():
                     lin2 = nn.Linear(500,100)
                     torch.nn.init.xavier_normal_(lin2.weight,gain=1)
                     lin3 = nn.Linear(100,action_space)
-                    torch.nn.init.xavier_normal_(lin3.weight,gain=1)
+                    torch.nn.init.xavier_normal_(lin3.weight,gain=0.2)
                     lin4 = nn.Linear(100,action_space)
                     torch.nn.init.constant_(lin4.weight,1.)
                     lin5 = nn.Linear(100,1)
@@ -150,7 +158,7 @@ class PPO_quad():
         self.mlp_optimizer = torch.optim.Adam(self.mlp.parameters(),lr = self.learning_rate)
         if load_model:
             self.mlp.load_state_dict(torch.load(self.model_path,map_location=self.device))
-            self.mlp_optimizer.load_state_dict(torch.load(self.optim_path,map_location=device))
+            self.mlp_optimizer.load_state_dict(torch.load(self.optim_path,map_location=self.device))
         else:
             pass
         self.mlp_optimizer.param_groups[0]['lr'] = self.learning_rate
@@ -165,7 +173,7 @@ class PPO_quad():
         logits, var, values = self.mlp(obs)
         old_shape = logits.shape
         logits, var = logits.view(*logits.shape,1), var.view(*var.shape,1)
-        probs = TanhNormal(loc = logits, scale=.5*nn.Sigmoid()(var),max=np.pi/4,min=-np.pi/4)
+        probs = TanhNormal(loc = logits, scale=self.zeta*nn.Sigmoid()(var),max=np.pi/4,min=-np.pi/4)
         if eval is True:
             action = probs.sample()
             return action.view(old_shape), probs.log_prob(action), values
@@ -199,8 +207,9 @@ class PPO_quad():
             local_observation          += [torch.Tensor(observation)]
             local_action               += [torch.Tensor(action)]
             local_logprob              += [torch.Tensor(logprob)]
-            observation, reward, info   = self.env.sim(np.array(action),real_time=False,train=True)
-            
+            observation, reward, info   = self.env.sim(np.array(action),real_time=self.real_time,train=self.train_)
+            if self.print_rew:
+                print(reward)
             # Stacking obs and previous action
             previous_action = action
             observation     = np.hstack([observation,previous_action])

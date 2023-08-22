@@ -42,6 +42,7 @@ class Quadrup_env():
         # Constant DO NOT TOUCH
         self.mode   = p.POSITION_CONTROL
         self.seed   = seed
+        self.sleep_time = 1./1240.
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
@@ -244,7 +245,7 @@ class Quadrup_env():
         speed = 25*obs[4]
 
         # Reward for being in good y direction
-        align = -50*self.base_pos[0]**2
+        align = -150*self.base_pos[0]**2
         
         # Reward for being high
         high = -100*(-self.base_pos[1]+.28) if self.base_pos[1]<.28 else 0
@@ -256,7 +257,8 @@ class Quadrup_env():
         force = (-1e-4)*((self.reaction_force[robotId,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-4)*((self.contact_force[robotId,:]**2)).sum()
+        contact =(-1e-3)*((self.contact_force[robotId,:]**2).sum())
+        
         return [speed, align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
@@ -264,10 +266,11 @@ class Quadrup_env():
 # for _ in range(1000):
 #     action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
 #     obs, rew, inf = env.sim(action)
-#     t.sleep(.5)
-#     print(obs.shape,rew.shape,inf.shape)
-#     print(env.time_steps_in_current_episode)
-#     print(obs[0])
-#     print(rew[0])
-#     print(inf[0])
+#     t.sleep(1./240.)
+#     # t.sleep(.5)
+#     # print(obs.shape,rew.shape,inf.shape)
+#     # print(env.time_steps_in_current_episode)
+#     # print(obs[0])
+#     # print(rew[0])
+#     # print(inf[0])
 # env.close()
