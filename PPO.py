@@ -32,7 +32,7 @@ class PPO_quad():
         seed                = 1107,
         mlp                 = None,
         action_space        = 12,
-        observation_space   = 38,
+        observation_space   = 52,
         device              = None,
         norm                = True,
         terrain_height      = [0, 0.05],
@@ -100,7 +100,7 @@ class PPO_quad():
                 def __init__(self):
                     super(MLP,self).__init__()
                 # nn setup
-                    lin1 = nn.Linear(observation_space+action_space,500)
+                    lin1 = nn.Linear(observation_space,500)
                     torch.nn.init.xavier_normal_(lin1.weight,gain=1)
                     lin2 = nn.Linear(500,100)
                     torch.nn.init.xavier_normal_(lin2.weight,gain=1)
@@ -195,8 +195,6 @@ class PPO_quad():
         local_timestep      = []
         local_values        = []
         observation         = self.env.get_obs()[0]
-        previous_action     = self.env.previous_pos
-        observation         = np.hstack([observation,previous_action]) 
         timestep            = np.array(self.env.time_steps_in_current_episode)
         local_timestep     += [torch.Tensor(timestep.copy())]
         for i in range(length) :
@@ -210,9 +208,6 @@ class PPO_quad():
             observation, reward, info   = self.env.sim(np.array(action),real_time=self.real_time,train=self.train_)
             if self.print_rew:
                 print(reward)
-            # Stacking obs and previous action
-            previous_action = action
-            observation     = np.hstack([observation,previous_action])
             reward          = np.sum(reward*self.reward_index,axis=-1)
             truncated       = info
             
@@ -314,17 +309,17 @@ class custom_dataset(Dataset):
         return self.local_return   
     
 # # # TEST CODE # # #
-# trainer = PPO_quad(
-#                 num_robot = 9,
-#                 learning_rate = 1e-4,
-#                 data_size = 10,
-#                 batch_size = 1,
-#                 epochs=100,
-#                 thresh=1,
-#                 explore = 1e-2,
-#                 epsilon = 0.2,
-#                 log_data = True,
-#                 save_model = True,
-#                 render_mode= False
-#                 )
-# trainer.train()
+trainer = PPO_quad(
+                num_robot = 9,
+                learning_rate = 1e-4,
+                data_size = 10,
+                batch_size = 1,
+                epochs=100,
+                thresh=1,
+                explore = 1e-2,
+                epsilon = 0.2,
+                log_data = True,
+                save_model = True,
+                render_mode= False
+                )
+trainer.train()

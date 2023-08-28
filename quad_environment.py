@@ -10,6 +10,7 @@ class Quadrup_env():
         max_length      = 500,
         num_step        = 10,
         render_mode     = None,
+        debug           = False,
         robot_file      = 'quadrupbot_env\\quadrup.urdf',
         num_robot       = 9,
         terrainHeight   = [0., 0.05],
@@ -23,6 +24,7 @@ class Quadrup_env():
             self.physicsClient  = p.connect(p.GUI)
         else:
             self.physicsClient  = p.connect(p.DIRECT)
+        self.debug              = debug
         self.robot_file         = robot_file
         self.num_robot          = num_robot 
         self.target_height      = [0.15, 0.5]
@@ -87,6 +89,7 @@ class Quadrup_env():
         self.base_ori       = np.zeros((self.num_robot,3))
         self.base_lin_vel   = np.zeros((self.num_robot,3))
         self.base_ang_vel   = np.zeros((self.num_robot,3))
+        self.target_dir     = np.zeros((self.num_robot,3))
         print('-'*100) 
         
     
@@ -148,7 +151,7 @@ class Quadrup_env():
         # Get base linear and angular velocity
         linear_velo, angular_velo = p.getBaseVelocity(robotId, physicsClientId = self.physicsClient)
         linear_velo, angular_velo = np.array(list(linear_velo)+[1]), np.array(list(angular_velo)+[1]) 
-        linear_velo, angular_velo = utils.bullet_active_rotation((base_position,base_orientation),(base_position,linear_velo))[1][:3], utils.bullet_active_rotation((base_position,base_orientation),(base_position,angular_velo))[1][:3]
+        linear_velo, angular_velo = utils.active_rotation(np.array(base_orientation),linear_velo)[:3], utils.active_rotation(np.array(base_orientation),angular_velo)[:3]
         temp_obs_value += [*linear_velo, *angular_velo]
         self.base_lin_vel[robotId,:] = linear_velo
         self.base_ang_vel[robotId,:] = angular_velo
@@ -176,20 +179,44 @@ class Quadrup_env():
                 self.contact_force[robotId,i] = 0.
         return temp_obs_vaule
     
+    
+    def calculate_target(self,robotId):
+        temp_obs_vaule = []
+        base_orientation =  p.getBasePositionAndOrientation(robotId, physicsClientId = self.physicsClient)[1]
+        target_dir = np.array([1,0,0]) #+ self.base_pos[robotId]
+        target_dir = np.array(list(target_dir)+[0])
+        target_dir = target_dir/np.linalg.norm(target_dir)
+        target_dir = utils.active_rotation(np.array(base_orientation),target_dir)[:3]
+        self.target_dir[robotId] = target_dir
+        temp_obs_vaule += [*target_dir]
+        return temp_obs_vaule
 
+
+    def get_previous_action(self,robotId):
+        temp_obs_value = []
+        temp_obs_value += [*self.previous_pos[robotId]]
+        return temp_obs_value
+    
+    
     def get_all_obs(self,robotId):
         temp_obs_value = []
         # Base position state
-        base_info = self.get_distance_and_ori_and_velocity_from_target(robotId)
+        base_info       = self.get_distance_and_ori_and_velocity_from_target(robotId)
         # Joints state
-        joints_info = self.get_joints_values(robotId)
+        joints_info     = self.get_joints_values(robotId)
         # Contact state
-        contact_info = self.get_contact_values(robotId)
+        contact_info    = self.get_contact_values(robotId)
+        # Previous action
+        previous_action = self.get_previous_action(robotId)
+        # Target state
+        target_info     = self.calculate_target(robotId)
         # Full observation
         temp_obs_value += [
                         *base_info,
                         *joints_info,
-                        *contact_info
+                        *contact_info,
+                        *previous_action,
+                        *target_info,
                         ]
         return temp_obs_value
     
@@ -221,7 +248,7 @@ class Quadrup_env():
             if train:
                 temp_info += [self.auto_reset(robotId)]
             # GET REWARD
-            temp_reward_value += [self.get_reward_value(temp_obs_value[-1],robotId)]
+            temp_reward_value += [self.get_reward_value(robotId)]
         return np.array(temp_obs_value), np.array(temp_reward_value), np.array(temp_info)
     
     
@@ -246,7 +273,8 @@ class Quadrup_env():
             p.stepSimulation( physicsClientId = self.physicsClient)
             if real_time:
                 t.sleep(self.sleep_time*self.num_step)
-        self.viz()
+        if self.debug:
+            self.viz()
         return self.get_obs(train)
                 
                 
@@ -273,16 +301,17 @@ class Quadrup_env():
         p.addUserDebugLine([0,offset,1],np.array([0,offset,1])+np.array([0,0.2,0]),lineWidth = 2, lifeTime =.5, lineColorRGB = [0,1,0])
         p.addUserDebugLine([0,offset,1],np.array([0,offset,1])+np.array([0.2,0,0]),lineWidth = 2, lifeTime =.5, lineColorRGB = [1,0,0])
         p.addUserDebugLine([0,offset,1],np.array([0,offset,1])+self.base_lin_vel[robotId],lineWidth = 2, lifeTime =.5, lineColorRGB = [0,0,0])
+        p.addUserDebugLine([0,offset,1],np.array([0,offset,1])+self.target_dir[robotId],lineWidth = 2, lifeTime =.5, lineColorRGB = [1,1,1])
         return
     
     
-    def calculate_target(self):
-        return
     
     
-    def get_reward_value(self,obs,robotId):
+    
+    def get_reward_value(self,robotId):
         # Reward for high speed in x direction
-        speed = 25*obs[3]
+        velo_vec = np.sum(self.base_lin_vel[robotId]*self.target_dir[robotId])/np.linalg.norm(self.target_dir[robotId])
+        speed = 25*velo_vec
 
         # Reward for being in good y direction
         align = -50*self.base_pos[robotId,1]**2
@@ -302,15 +331,21 @@ class Quadrup_env():
         return [speed, align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
-env = Quadrup_env(render_mode='human',num_robot=2,terrainHeight=[0.,0.])             
-for _ in range(1000):
-    action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
-    obs, rew, inf = env.sim(action,real_time=True)
-    # t.sleep(1./240.)
-    # t.sleep(.5)
-    # print(obs.shape,rew.shape,inf.shape)
-    # print(env.time_steps_in_current_episode)
-    # print(obs[0])
-    # print(rew[0])
-    # print(inf[0])
-env.close()
+# env = Quadrup_env(
+#                     render_mode     = 'human',
+#                     num_robot       = 2,
+#                     debug           = True,
+#                     terrainHeight   = [0.,0.],
+#                     )             
+
+# for _ in range(1000):
+#     action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
+#     obs, rew, inf = env.sim(action,real_time=True)
+#     # t.sleep(1./240.)
+#     # t.sleep(.5)
+#     # print(obs.shape,rew.shape,inf.shape)
+#     # print(env.time_steps_in_current_episode)
+#     # print(obs[0])
+#     # print(rew[0])
+#     # print(inf[0])
+# env.close()
