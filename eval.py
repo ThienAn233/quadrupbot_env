@@ -2,7 +2,7 @@ import PPO
 import quad_environment as qa
 
 eval = PPO.PPO_quad(
-    load_model      = '2023-08-30-09-04-38',
+    load_model      = '2023-08-30-18-44-55_best_2.66',
     num_robot       = 2,
     learning_rate   = 0,
     data_size       = 500,
@@ -21,6 +21,6 @@ eval = PPO.PPO_quad(
     zeta            = 0.002,
     terrain_height  = [0., 0.05],
     debug           = True,
-    # run             = 1    
+    run             = 1    
 )
 eval.train()

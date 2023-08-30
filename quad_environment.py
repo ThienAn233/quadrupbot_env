@@ -273,7 +273,7 @@ class Quadrup_env():
             self.act(filtered_action)
             p.stepSimulation( physicsClientId = self.physicsClient)
             if real_time:
-                t.sleep(self.sleep_time*self.num_step)
+                t.sleep(self.sleep_time)
         if self.debug:
             self.viz()
         return self.get_obs(train)
@@ -344,7 +344,7 @@ class Quadrup_env():
 # # # TEST CODE # # #
 # env = Quadrup_env(
 #                     render_mode     = 'human',
-#                     num_robot       = 9,
+#                     num_robot       = 2,
 #                     debug           = True,
 #                     terrainHeight   = [0.,0.05],
 #                     )             
