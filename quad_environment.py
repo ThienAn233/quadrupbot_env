@@ -4,6 +4,7 @@ import numpy as np
 import time as t 
 import utils
 
+
 class Quadrup_env():
     def __init__(
         self,
@@ -30,8 +31,8 @@ class Quadrup_env():
         self.target_height      = [0.15, 0.5]
         self.initialVel         = [0, .1]
         self.initialMass        = [0, 1.]
-        self.initialPos         = [0, .1]
-        self.initialFriction    = [0, .3]
+        self.initialPos         = [0, .2]
+        self.initialFriction    = [-0.5, .5]
         self.terrainHeight      = terrainHeight
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937 + self.terrainHeight[-1]
@@ -49,7 +50,7 @@ class Quadrup_env():
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 1.5*self.pi
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         self.terrain_shape  = [10, 2*self.num_robot]
@@ -136,8 +137,9 @@ class Quadrup_env():
         terrainShape = p.createCollisionShape(shapeType = p.GEOM_HEIGHTFIELD, meshScale=self.terrainScale, heightfieldTextureScaling=(numHeightfieldRows-1)/2, heightfieldData=heightfieldData, numHeightfieldRows=numHeightfieldRows, numHeightfieldColumns=numHeightfieldColumns, physicsClientId=self.physicsClient)
         self.terrainId = p.createMultiBody(0, terrainShape, physicsClientId=self.physicsClient,useMaximalCoordinates =True)
         p.resetBasePositionAndOrientation(self.terrainId,[+4.5,0,0], [0,0,0,1], physicsClientId=self.physicsClient)
-        self.textureId = p.loadTexture("heightmaps/gimp_overlay_out.png")
+        self.textureId = p.loadTexture('quadrupbot_env\\color_map.png')
         p.changeVisualShape(self.terrainId, -1, textureUniqueId = self.textureId)
+        p.changeVisualShape(self.terrainId, -1, rgbaColor=[1,1,1,1])
 
     
     def get_distance_and_ori_and_velocity_from_target(self,robotId):
@@ -306,7 +308,7 @@ class Quadrup_env():
         return
     
     
-    def leg_traj(self,t,mag_thigh = 0.2,mag_bicep=0.4):
+    def leg_traj(self,t,mag_thigh = 0.4,mag_bicep=0.4):
         return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
@@ -334,7 +336,7 @@ class Quadrup_env():
         surv = 20
         
         # Reward for minimal force
-        force = (-1e-4)*((self.reaction_force[robotId,:]**2).sum())
+        force = (-1e-5)*((self.reaction_force[robotId,:]**2).sum())
 
         # Reward for minimal contact force
         contact =(-1e-4)*((self.contact_force[robotId,:]**2).sum())
@@ -346,7 +348,7 @@ class Quadrup_env():
 #                     render_mode     = 'human',
 #                     num_robot       = 2,
 #                     debug           = True,
-#                     terrainHeight   = [0.,0.05],
+#                     terrainHeight   = [0. ,0.05],
 #                     )             
 # for time in range(1000):
 #     # print(env.time_steps_in_current_episode)
@@ -358,6 +360,6 @@ class Quadrup_env():
 #     # print(obs.shape,rew.shape,inf.shape)
 #     # print(env.time_steps_in_current_episode)
 #     # print(obs[0])
-#     # print(rew[0])
+#     print(rew[0])
 #     # print(inf[0])
 # env.close()
