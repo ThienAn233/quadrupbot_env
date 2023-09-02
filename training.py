@@ -7,6 +7,7 @@ os.popen('tensorboard --logdir=quadrupbot_env\\runs')
 
 # Run training code
 trainer = PPO.PPO_quad(
+    load_model      = '2023-08-31-20-48-45',
     num_robot       = 9,
     learning_rate   = 1e-4,
     data_size       = 10000,

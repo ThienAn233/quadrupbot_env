@@ -50,10 +50,10 @@ class Quadrup_env():
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 4*self.pi
+        self.T      = self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
-        self.terrain_shape  = [10, 2*self.num_robot]
+        self.terrain_shape  = [50, 2*self.num_robot]
         self.feet_list = [2,5,8,11]
         
         # Setup the environment
@@ -136,7 +136,7 @@ class Quadrup_env():
                 heightfieldData[2*i+1+(2*j+1)*numHeightfieldRows]=height
         terrainShape = p.createCollisionShape(shapeType = p.GEOM_HEIGHTFIELD, meshScale=self.terrainScale, heightfieldTextureScaling=(numHeightfieldRows-1)/2, heightfieldData=heightfieldData, numHeightfieldRows=numHeightfieldRows, numHeightfieldColumns=numHeightfieldColumns, physicsClientId=self.physicsClient)
         self.terrainId = p.createMultiBody(0, terrainShape, physicsClientId=self.physicsClient,useMaximalCoordinates =True)
-        p.resetBasePositionAndOrientation(self.terrainId,[+4.5,0,0], [0,0,0,1], physicsClientId=self.physicsClient)
+        p.resetBasePositionAndOrientation(self.terrainId,[+24.5,0,0], [0,0,0,1], physicsClientId=self.physicsClient)
         self.textureId = p.loadTexture('quadrupbot_env\\color_map.png')
         p.changeVisualShape(self.terrainId, -1, textureUniqueId = self.textureId)
         p.changeVisualShape(self.terrainId, -1, rgbaColor=[1,1,1,1])
@@ -327,10 +327,10 @@ class Quadrup_env():
 
         # Reward for being in good y direction
         align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 5*align_vec
+        align = 5*(align_vec-1)
         
         # Reward for being high
-        high = -50*(-self.base_pos[robotId,-1]+.28) if self.base_pos[robotId,-1]<.28 else 0
+        high = -50*(-self.base_pos[robotId,-1]+.3) if self.base_pos[robotId,-1]<.3 else 0
         
         # Reward for surviving 
         surv = 20
@@ -348,7 +348,7 @@ class Quadrup_env():
 #                     render_mode     = 'human',
 #                     num_robot       = 2,
 #                     debug           = True,
-#                     terrainHeight   = [0. ,0.05],
+#                     terrainHeight   = [0. ,0.],
 #                     )             
 # for time in range(1000):
 #     # print(env.time_steps_in_current_episode)

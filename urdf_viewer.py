@@ -20,7 +20,7 @@ physicsClient = p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
 # Constants
-g = (0,0,-9.81) 
+g = (0,0,-.981) 
 pi = np.pi
 
 # Setup the environment
@@ -62,8 +62,8 @@ while True:
                                 positionGains = np.ones_like(temp_debug_value)*.5,
                                 # velocityGains = np.ones_like(temp_debug_value)*0.,        
                                 )
-    p.resetBasePositionAndOrientation(robotId,[0.,0.,initial_height],initial_ori)
-    # base_inf =  p.getBasePositionAndOrientation(robotId)
-    # print(f'robot height: {base_inf[0][-1]}')
+    # p.resetBasePositionAndOrientation(robotId,[0.,0.,initial_height],initial_ori)
+    base_inf =  p.getBasePositionAndOrientation(robotId)
+    print(f'robot height: {base_inf[0][-1]}')
     previous_pos = np.array(temp_debug_value)
     t.sleep(sleep_time)
