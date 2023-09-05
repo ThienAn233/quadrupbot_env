@@ -40,6 +40,7 @@ class PPO_quad():
         real_time           = False,
         train_              = True,
         debug               = False,
+        robot_file          = 'quadrupbot_env\\quadrup.urdf',
         run                 = None,
         ):
         
@@ -72,6 +73,7 @@ class PPO_quad():
         self.real_time          = real_time
         self.train_             = train_
         self.debug              = debug 
+        self.robot_file         = robot_file
         self.run                = run
         
         # Setup random seed
@@ -90,7 +92,7 @@ class PPO_quad():
         print('Using device: ', self.device)
         
         # Setup env
-        self.env = envi.Quadrup_env(num_robot=self.num_robot,render_mode=self.render_mode,terrainHeight=self.terrain_height,debug=self.debug)
+        self.env = envi.Quadrup_env(num_robot=self.num_robot,render_mode=self.render_mode,terrainHeight=self.terrain_height,debug=self.debug,robot_file=self.robot_file)
         print('env is ready!')
         print(f'action space of {num_robot} robot is: {action_space}')
         print(f'observation sapce of {num_robot} robot is: {observation_space}')

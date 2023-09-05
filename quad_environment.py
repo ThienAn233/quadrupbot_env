@@ -31,8 +31,8 @@ class Quadrup_env():
         self.target_height      = [0.15, 0.5]
         self.initialVel         = [0, .1]
         self.initialMass        = [0, 1.]
-        self.initialPos         = [0, .2]
-        self.initialFriction    = [-0.5, .5]
+        self.initialPos         = [0, .1]
+        self.initialFriction    = [0, .3]
         self.terrainHeight      = terrainHeight
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937 + self.terrainHeight[-1]
@@ -49,7 +49,7 @@ class Quadrup_env():
         self.sleep_time = 1./1240.
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
-        self.pi     = np.pi
+        self.pi     = 1.5*np.pi
         self.T      = self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
@@ -308,7 +308,7 @@ class Quadrup_env():
         return
     
     
-    def leg_traj(self,t,mag_thigh = 0.4,mag_bicep=0.4):
+    def leg_traj(self,t,mag_thigh = 0.2,mag_bicep=0.4):
         return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
