@@ -32,7 +32,7 @@ class Quadrup_env():
         self.initialVel         = [0, .1]
         self.initialMass        = [0, 1.]
         self.initialPos         = [0, .1]
-        self.initialFriction    = [0, .3]
+        self.initialFriction    = [10, 15]
         self.terrainHeight      = terrainHeight
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937 + self.terrainHeight[-1]
@@ -140,6 +140,7 @@ class Quadrup_env():
         self.textureId = p.loadTexture('quadrupbot_env\\color_map.png')
         p.changeVisualShape(self.terrainId, -1, textureUniqueId = self.textureId)
         p.changeVisualShape(self.terrainId, -1, rgbaColor=[1,1,1,1])
+        p.changeDynamics(self.terrainId,-1,lateralFriction=10)
 
     
     def get_distance_and_ori_and_velocity_from_target(self,robotId):
