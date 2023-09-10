@@ -2,7 +2,7 @@ import PPO_cnn
 import quad_cnn_env as qa
 
 eval = PPO_cnn.PPO_quad(
-    load_model      = '2023-09-08-20-38-56_best_1.65', 
+    load_model      = '2023-09-09-14-42-51_best_2.01', 
     num_robot       = 1,
     learning_rate   = 0,
     data_size       = 500,
