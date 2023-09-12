@@ -29,22 +29,23 @@ class Quadrup_env():
         self.debug              = debug
         self.robot_file         = robot_file
         self.num_robot          = num_robot 
-        self.target_height      = [0.15, 0.5]
-        self.initialVel         = [0, .1]
+        self.target_height      = [0.17, 0.5]
+        self.initialVel         = [0, .2]
         self.initialMass        = [0, 1.]
-        self.initialPos         = [0, .2]
-        self.initialFriction    = [-0.25, .5]
+        self.initialPos         = [0, .3]
+        self.initialFriction    = [0, .6]
         self.terrainHeight      = terrainHeight
         self.buffer_length      = buffer_length
         self.terrainScale       = [.05, .05, 1]
-        self.initialHeight      = .2937 + self.terrainHeight[-1]
+        self.initialHeight      = .2937
+        self.initialHeight_list = []
         self.robotId_list       = []
         self.jointId_list       = []
         self.jointName_list     = []
         self.jointRange_list    = []
         self.jointMaxForce_list = []
         self.jointMaxVeloc_list = []
-        
+
         # Constant DO NOT TOUCH
         self.mode   = p.POSITION_CONTROL
         self.seed   = seed
@@ -143,22 +144,32 @@ class Quadrup_env():
                 
     
     def sample_terrain(self):
-        numHeightfieldRows = int(self.terrain_shape[0]/self.terrainScale[0])
-        numHeightfieldColumns = int(self.terrain_shape[1]/self.terrainScale[1])
-        heightfieldData = [0]*numHeightfieldRows*numHeightfieldColumns 
-        for j in range (int(numHeightfieldColumns/2)):
-            for i in range (int(numHeightfieldRows/2) ):
-                height = round(np.random.uniform(*self.terrainHeight),2)
-                heightfieldData[2*i+2*j*numHeightfieldRows]=height
-                heightfieldData[2*i+1+2*j*numHeightfieldRows]=height
-                heightfieldData[2*i+(2*j+1)*numHeightfieldRows]=height
-                heightfieldData[2*i+1+(2*j+1)*numHeightfieldRows]=height
+        numHeightfieldRows = int(self.terrain_shape[0]/(self.terrainScale[0]))
+        numHeightfieldColumns = int(self.terrain_shape[1]/(self.terrainScale[1]))
+        terrain_list = []
+        for i in range(self.num_robot):
+            x = np.linspace(0,self.terrain_shape[0],numHeightfieldRows)
+            y = np.linspace(0,self.terrain_shape[1]/self.num_robot,int(numHeightfieldColumns/self.num_robot))
+            xx, yy = np.meshgrid(x,y)
+            if i % 3 == 0 :
+                a, b, c = np.random.uniform(0.25,0.5), np.random.uniform(0.5,1.5), np.random.uniform(0.5,1.5)
+                zz = a*(np.sin(b*xx)+np.cos(c*yy)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
+            if i % 3 == 1 :
+                zz = np.random.uniform(*self.terrainHeight,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
+            if i % 3 == 2 :
+                a, b =  np.random.uniform(0.5,1.), np.random.uniform(0.25,.75)
+                zz = np.round(a*(np.sin(b*xx)),1)
+            terrain_list +=  [zz]
+            print(zz.shape)
+            self.initialHeight_list.append(np.max(zz[:,:20]))
+        heightfieldData = np.vstack(terrain_list).flatten()
         terrainShape = p.createCollisionShape(shapeType = p.GEOM_HEIGHTFIELD, meshScale=self.terrainScale, heightfieldTextureScaling=(numHeightfieldRows-1)/2, heightfieldData=heightfieldData, numHeightfieldRows=numHeightfieldRows, numHeightfieldColumns=numHeightfieldColumns, physicsClientId=self.physicsClient)
         self.terrainId = p.createMultiBody(0, terrainShape, physicsClientId=self.physicsClient,useMaximalCoordinates =True)
         p.resetBasePositionAndOrientation(self.terrainId,[+24.5,0,0], [0,0,0,1], physicsClientId=self.physicsClient)
         self.textureId = p.loadTexture('quadrupbot_env\\color_map.png')
         p.changeVisualShape(self.terrainId, -1, textureUniqueId = self.textureId)
         p.changeVisualShape(self.terrainId, -1, rgbaColor=[1,1,1,1])
+        self.corr_list[:,-1] = np.array(self.initialHeight_list) + self.corr_list[:,-1]
 
     
     def get_distance_and_ori_and_velocity_from_target(self,robotId):
@@ -244,7 +255,7 @@ class Quadrup_env():
     
     
     def truncation_check(self,height,dir,robotId):
-        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (self.target_height[0] > height) | (dir<.8)
+        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (dir<.8) #| (self.target_height[0] > height)
     
     
     def auto_reset(self,robotId):
@@ -346,10 +357,10 @@ class Quadrup_env():
 
         # Reward for being in good y direction
         align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 5*(align_vec-1)
+        align = 50*(align_vec-1)
         
         # Reward for being high
-        high = -50*(-self.base_pos[robotId,-1]+.3) if self.base_pos[robotId,-1]<.3 else 0
+        high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
         
         # Reward for surviving 
         surv = 20
@@ -358,28 +369,28 @@ class Quadrup_env():
         force = (-1e-5)*((self.reaction_force[robotId,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-4)*((self.contact_force[robotId,:]**2).sum())
+        contact =(-1e-3)*((self.contact_force[robotId,:]**2).sum())
         
         return [speed, align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
-# env = Quadrup_env(
-#                     render_mode     = 'human',
-#                     num_robot       = 2,
-#                     debug           = True,
-#                     terrainHeight   = [0. ,0.],
-#                     )             
-# for time in range(1000):
-#     # print(env.time_steps_in_current_episode)
-#     action = env.get_run_gait(env.time_steps_in_current_episode)
-#     # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
-#     obs, rew, inf = env.sim(action,real_time=True)
-#     # t.sleep(1./240.)
-#     t.sleep(.5)
-#     # print(obs.shape,rew.shape,inf.shape)
-#     # print(env.time_steps_in_current_episode)
-#     print(time,obs[0])
-#     # print(rew[0])
-#     # print(inf[0])
-#     # print('-'*100)
-# env.close()
+env = Quadrup_env(
+                    render_mode     = 'human',
+                    num_robot       = 9,
+                    debug           = True,
+                    terrainHeight   = [0. ,0.05],
+                    )             
+for time in range(1000):
+    # print(env.time_steps_in_current_episode)
+    action = env.get_run_gait(env.time_steps_in_current_episode)
+    # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
+    obs, rew, inf = env.sim(action,real_time=True)
+    # t.sleep(1./240.)
+    # t.sleep(.5)
+    # print(obs.shape,rew.shape,inf.shape)
+    # print(env.time_steps_in_current_episode)
+    # print(time,obs[0])
+    print(rew[0])
+    # print(inf[0])
+    # print('-'*100)
+env.close()
