@@ -160,11 +160,11 @@ class Quadrup_env():
             if i % 3 == 2 :
                 a, b =  np.random.uniform(0.5,1.), np.random.uniform(0.25,.75)
                 zz = np.round(a*(np.sin(b*xx)),1)
-            mean = np.mean(zz[:,0])
-            platform = mean*np.ones((int(numHeightfieldColumns/self.num_robot),plat)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),plat))
+            max = np.max(zz[:,0])
+            platform = max*np.ones((int(numHeightfieldColumns/self.num_robot),plat)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),plat))
             zz = np.hstack([platform,zz])
             terrain_list +=  [zz]
-            self.initialHeight_list.append(mean)
+            self.initialHeight_list.append(max)
         heightfieldData = np.vstack(terrain_list).flatten()
         terrainShape = p.createCollisionShape(shapeType = p.GEOM_HEIGHTFIELD, meshScale=self.terrainScale, heightfieldTextureScaling=(numHeightfieldRows-1)/2, heightfieldData=heightfieldData, numHeightfieldRows=numHeightfieldRows+plat, numHeightfieldColumns=numHeightfieldColumns, physicsClientId=self.physicsClient)
         self.terrainId = p.createMultiBody(0, terrainShape, physicsClientId=self.physicsClient,useMaximalCoordinates =True)
