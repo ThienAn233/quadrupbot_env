@@ -2,8 +2,8 @@ import PPO_cnn
 import quad_cnn_env as qa
 
 eval = PPO_cnn.PPO_quad(
-    load_model      = '2023-09-10-18-42-30_best_2.58', 
-    num_robot       = 1,
+    load_model      = '2023-09-12-18-50-57', 
+    num_robot       = 3,
     learning_rate   = 0,
     data_size       = 500,
     batch_size      = 500*2,
@@ -18,8 +18,8 @@ eval = PPO_cnn.PPO_quad(
     print_rew       = True,
     real_time       = True,
     train_          = True,
-    zeta            = 0.2,
-    terrain_height  = [0., 0.0],
+    zeta            = 0.5,
+    terrain_height  = [0., 0.05],
     debug           = True,
     run             = 1    
 )
