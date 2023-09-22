@@ -12,7 +12,7 @@ from torch.utils.tensorboard import SummaryWriter
 class PPO_quad():
     def __init__(
         self,
-        PATH                = 'quadrupbot_env\\',
+        PATH                = 'quadrupbot_env//',
         load_model          = None,
         envi                = qe,
         log_data            = True,
@@ -40,7 +40,7 @@ class PPO_quad():
         real_time           = False,
         train_              = True,
         debug               = False,
-        robot_file          = 'quadrupbot_env\\quadrup.urdf',
+        robot_file          = 'quadrupbot_env//quadrup.urdf',
         run                 = None,
         ):
         
@@ -83,8 +83,8 @@ class PPO_quad():
         
         # Load model path and device
         if load_model:
-            self.model_path = PATH + '\\models\\PPO\\' + load_model
-            self.optim_path = PATH + '\\models\\PPO\\' + load_model + '_optim'
+            self.model_path = PATH + '//models//PPO//' + load_model
+            self.optim_path = PATH + '//models//PPO//' + load_model + '_optim'
         if self.device:
             pass
         else:
@@ -172,7 +172,7 @@ class PPO_quad():
         
         # Tensor board
         if self.log_data:
-            self.writer = SummaryWriter(PATH + '\\runs\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
+            self.writer = SummaryWriter(PATH + '//runs//PPO//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
     
     
     def get_actor_critic_action_and_values(self,obs,eval=True):
@@ -260,8 +260,8 @@ class PPO_quad():
                 if self.save_model:
                     if (quality.mean().item()>best_reward and quality.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
                         best_reward = quality.mean().item()
-                        torch.save(mlp.state_dict(), self.PATH+'models\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
-                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
+                        torch.save(mlp.state_dict(), self.PATH+'models//PPO//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
+                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//PPO//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
                         print('saved at: '+str(round(quality.mean().item(),2)))
                 
                 # logging info
@@ -272,8 +272,8 @@ class PPO_quad():
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().mean().item(),epoch*(len(dataloader))+iteration)
                 print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().mean().item()} act: {actor_loss.detach().mean().item()} entr: {entropy_loss.detach().item()}')
-        torch.save(mlp.state_dict(), self.PATH+'models\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
-        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models\\PPO\\'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
+        torch.save(mlp.state_dict(), self.PATH+'models//PPO//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
+        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//PPO//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
         
 
 class custom_dataset(Dataset):
