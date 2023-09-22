@@ -5,7 +5,7 @@ import time as t
 import utils
 
 # Variables
-PATH = 'quadrupbot_env\\quadrup.urdf'
+PATH = 'quadrupbot_env//quadrup.urdf'
 sleep_time = 1./240.
 initial_height = 0.2937
 initial_ori = [0,0,0,1]
