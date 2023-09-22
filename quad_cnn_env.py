@@ -12,7 +12,7 @@ class Quadrup_env():
         num_step        = 10,
         render_mode     = None,
         debug           = False,
-        robot_file      = 'quadrupbot_env\\quadrup.urdf',
+        robot_file      = 'quadrupbot_env//quadrup.urdf',
         num_robot       = 9,
         terrainHeight   = [0., 0.05],
         seed            = 0,
@@ -169,7 +169,7 @@ class Quadrup_env():
         terrainShape = p.createCollisionShape(shapeType = p.GEOM_HEIGHTFIELD, meshScale=self.terrainScale, heightfieldTextureScaling=(numHeightfieldRows-1)/2, heightfieldData=heightfieldData, numHeightfieldRows=numHeightfieldRows+plat, numHeightfieldColumns=numHeightfieldColumns, physicsClientId=self.physicsClient)
         self.terrainId = p.createMultiBody(0, terrainShape, physicsClientId=self.physicsClient,useMaximalCoordinates =True)
         p.resetBasePositionAndOrientation(self.terrainId,[+24.5,0,0], [0,0,0,1], physicsClientId=self.physicsClient)
-        self.textureId = p.loadTexture('quadrupbot_env\\color_map.png')
+        self.textureId = p.loadTexture('quadrupbot_env//color_map.png')
         p.changeVisualShape(self.terrainId, -1, textureUniqueId = self.textureId)
         p.changeVisualShape(self.terrainId, -1, rgbaColor=[1,1,1,1])
         self.corr_list[:,-1] = np.array(self.initialHeight_list) + self.corr_list[:,-1]
