@@ -4,7 +4,7 @@ import quad_environment as qa
 eval = PPO.PPO_quad(
     load_model      = '2023-09-08-20-39-38',
     # load_model      = '2023-08-30-20-10-11', 
-    robot_file      = 'quadrupbot_env\quadrupv1.urdf',
+    robot_file      = 'quadrupbot_env//quadrupv1.urdf',
     num_robot       = 2,
     learning_rate   = 0,
     data_size       = 500,
