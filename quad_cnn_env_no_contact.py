@@ -52,7 +52,7 @@ class Quadrup_env():
         self.sleep_time = 1./1240.
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
-        self.pi     = np.pi
+        self.pi     = 2*np.pi
         self.T      = self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
@@ -153,13 +153,13 @@ class Quadrup_env():
             y = np.linspace(-self.terrain_shape[1]/(2*self.num_robot),self.terrain_shape[1]/(2*self.num_robot),int(numHeightfieldColumns/self.num_robot))
             xx, yy = np.meshgrid(x,y)
             if i % 3 == 0 :
-                a, b, c = np.random.uniform(0.1,0.25), np.random.uniform(0.5,1.5), np.random.uniform(0.5,1.5)
-                zz = a*(np.sin(b*xx)+np.sin(c*yy)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
+                a, b, c = np.random.uniform(0.05,0.15), np.random.uniform(1,1.5), np.random.uniform(1,1.5)
+                zz = a*(np.cos(b*xx)+np.cos(c*yy)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
             if i % 3 == 1 :
                 zz = np.random.uniform(*self.terrainHeight,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
             if i % 3 == 2 :
-                a, b =  np.random.uniform(0.5,1.), np.random.uniform(0.25,.75)
-                zz = np.round(a*(np.sin(b*xx)),1)
+                a, b, c =  np.random.uniform(0.25,.5), np.random.uniform(0.2,.5), np.random.uniform(0.1,.4)
+                zz = np.round(a*(np.sin(b*xx))/c,1)*c
             max = np.max(zz[:,0])
             platform = max*np.ones((int(numHeightfieldColumns/self.num_robot),plat)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),plat))
             zz = np.hstack([platform,zz])
@@ -250,7 +250,7 @@ class Quadrup_env():
         temp_obs_value += [
                         *base_info,
                         *joints_info,
-                        *contact_info,
+                        # *contact_info,
                         *previous_action,
                         *target_info,
                         ]
@@ -258,7 +258,7 @@ class Quadrup_env():
     
     
     def truncation_check(self,ori,dir,robotId):
-        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (dir<.8) | (ori<.4) | (np.abs(self.base_pos[robotId,1]) > (.5*self.terrain_shape[-1]/self.num_robot) )
+        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (dir<.8) | (ori<.1) | (np.abs(self.base_pos[robotId,1]) > (.5*self.terrain_shape[-1]/self.num_robot) )
     
     
     def auto_reset(self,robotId):
@@ -356,9 +356,9 @@ class Quadrup_env():
     def get_reward_value(self,robotId):
         # Reward for high speed in x direction
         velo_vec = np.sum(self.base_lin_vel[robotId]*self.target_dir[robotId])/np.linalg.norm(self.target_dir[robotId])
-        if velo_vec > .5 :
+        if velo_vec > .25 :
             speed = 25*velo_vec 
-        if 0 < velo_vec <.5 :
+        if 0 < velo_vec <.25 :
             speed = 0
         if velo_vec < 0 :
             speed = 50*velo_vec
