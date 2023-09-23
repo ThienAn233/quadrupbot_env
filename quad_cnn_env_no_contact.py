@@ -258,7 +258,7 @@ class Quadrup_env():
     
     
     def truncation_check(self,ori,dir,robotId):
-        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (dir<.8) | (ori<.1) | (np.abs(self.base_pos[robotId,1]) > (.5*self.terrain_shape[-1]/self.num_robot) )
+        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (dir<.8) | (ori<.1) | (np.abs(self.base_pos[robotId,1]) > (.25*self.terrain_shape[-1]/self.num_robot) )
     
     
     def auto_reset(self,robotId):
@@ -377,7 +377,7 @@ class Quadrup_env():
         force = (-1e-5)*((self.reaction_force[robotId,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-3)*((self.contact_force[robotId,:]**2).sum())
+        contact =(-1e-4)*((self.contact_force[robotId,:]**2).sum())
         
         return [speed, align, high, surv, force,  contact]
     

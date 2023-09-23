@@ -1,13 +1,14 @@
 import os
 import PPO_cnn
-import quad_cnn_env as qa
+import quad_cnn_env_no_contact as qa
 
 # Open tensor board
 os.popen('tensorboard --logdir=quadrupbot_env\\runs')
 
 # Run training code
 trainer = PPO_cnn.PPO_quad(
-    load_model      = '2023-09-13-15-37-25',
+    envi            = qa,
+    # norm            = False,
     num_robot       = 9,
     learning_rate   = 1e-4,
     data_size       = 10000,
