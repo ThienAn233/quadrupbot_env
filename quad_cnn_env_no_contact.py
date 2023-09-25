@@ -52,7 +52,7 @@ class Quadrup_env():
         self.sleep_time = 1./1240.
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
-        self.pi     = 2*np.pi
+        self.pi     = np.pi
         self.T      = self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
@@ -365,7 +365,7 @@ class Quadrup_env():
 
         # Reward for being in good y direction
         align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 50*(align_vec-1)
+        align = 0 # 10*(align_vec-1)
         
         # Reward for being high
         high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
@@ -374,10 +374,10 @@ class Quadrup_env():
         surv = 20
         
         # Reward for minimal force
-        force = (-1e-5)*((self.reaction_force[robotId,:]**2).sum())
+        force = (-1e-4)*((self.reaction_force[robotId,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-4)*((self.contact_force[robotId,:]**2).sum())
+        contact =(-1e-3)*((self.contact_force[robotId,:]**2).sum())
         
         return [speed, align, high, surv, force,  contact]
     

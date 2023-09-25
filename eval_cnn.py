@@ -3,9 +3,9 @@ import quad_cnn_env_no_contact as qa
 
 eval = PPO_cnn.PPO_quad(
     # load_model      = '2023-09-13-20-08-22', 
-    load_model      = '2023-09-23-19-06-07_best_0.58',     
+    load_model      = '2023-09-25-19-27-52_best_0.91',     
     envi            = qa,
-    num_robot       = 9,
+    num_robot       = 3,
     learning_rate   = 0,
     data_size       = 500,
     batch_size      = 500*2,
@@ -18,7 +18,7 @@ eval = PPO_cnn.PPO_quad(
     render_mode     = True, 
     norm            = False,
     print_rew       = True,
-    real_time       = False,
+    real_time       = True,
     train_          = True,
     zeta            = 0.05,
     terrain_height  = [0., 0.05],
