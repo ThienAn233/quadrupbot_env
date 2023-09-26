@@ -258,7 +258,7 @@ class Quadrup_env():
     
     
     def truncation_check(self,ori,dir,robotId):
-        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (dir<.8) | (ori<.1) | (np.abs(self.base_pos[robotId,1]) > (.25*self.terrain_shape[-1]/self.num_robot) )
+        return  (self.time_steps_in_current_episode[robotId]>self.max_length) | (dir<.8) | (ori<.8) | (np.abs(self.base_pos[robotId,1]) > (.25*self.terrain_shape[-1]/self.num_robot) )
     
     
     def auto_reset(self,robotId):
@@ -365,7 +365,7 @@ class Quadrup_env():
 
         # Reward for being in good y direction
         align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 0 # 10*(align_vec-1)
+        align = 10*(align_vec-1)
         
         # Reward for being high
         high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
