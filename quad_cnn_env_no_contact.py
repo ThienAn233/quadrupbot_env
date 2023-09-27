@@ -53,10 +53,10 @@ class Quadrup_env():
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = self.pi
+        self.T      = 1.5*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
-        self.terrain_shape  = [50, 2*self.num_robot]
+        self.terrain_shape  = [50, 3*self.num_robot]
         self.feet_list = [2,5,8,11]
         
         # Setup the environment
@@ -116,8 +116,10 @@ class Quadrup_env():
     
     
     def get_init_pos(self):
-        nrow = int(self.num_robot)
-        x = np.linspace(-(nrow-1),(nrow-1),nrow)
+        nrow = self.num_robot
+        L = self.terrain_shape[-1]
+        delta = L/nrow
+        x = np.linspace(-L/2+delta/2,L/2-delta/2,nrow)
         xv,yv = np.meshgrid(0,x)
         xv, yv = np.hstack(xv), np.hstack(yv)
         zv = self.initialHeight*np.ones_like(xv)
@@ -158,7 +160,7 @@ class Quadrup_env():
             if i % 3 == 1 :
                 zz = np.random.uniform(*self.terrainHeight,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
             if i % 3 == 2 :
-                a, b, c =  np.random.uniform(0.25,.5), np.random.uniform(0.2,.5), np.random.uniform(0.1,.4)
+                a, b, c =  np.random.uniform(0.2,.4), np.random.uniform(0.2,.5), np.random.uniform(0.1,.4)
                 zz = np.round(a*(np.sin(b*xx))/c,1)*c
             max = np.max(zz[:,0])
             platform = max*np.ones((int(numHeightfieldColumns/self.num_robot),plat)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),plat))
@@ -384,7 +386,7 @@ class Quadrup_env():
 # # # TEST CODE # # #
 # env = Quadrup_env(
 #                     render_mode     = 'human',
-#                     num_robot       = 3,
+#                     num_robot       = 9,
 #                     debug           = True,
 #                     terrainHeight   = [0. ,0.05],
 #                     )             
