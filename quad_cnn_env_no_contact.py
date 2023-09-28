@@ -363,11 +363,11 @@ class Quadrup_env():
         if 0 < velo_vec <.25 :
             speed = 0
         if velo_vec < 0 :
-            speed = 50*velo_vec
+            speed = 25*velo_vec
 
         # Reward for being in good y direction
         align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 0 # 10*(align_vec-1)
+        align = 50*(align_vec-1)
         
         # Reward for being high
         high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
