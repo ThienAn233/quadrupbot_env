@@ -220,8 +220,8 @@ class Quadrup_env():
     
     def calculate_target(self,robotId):
         temp_obs_vaule = []
-        base_orientation =  p.getBasePositionAndOrientation(robotId, physicsClientId = self.physicsClient)[1]
-        target_dir = np.array([1,0,0]) #+ self.base_pos[robotId]
+        base_pos, base_orientation =  p.getBasePositionAndOrientation(robotId, physicsClientId = self.physicsClient)
+        target_dir = np.array([2,self.corr_list[robotId][1]-base_pos[1],0]) #+ self.base_pos[robotId]
         target_dir = np.array(list(target_dir)+[0])
         target_dir = target_dir/np.linalg.norm(target_dir)
         target_dir = utils.active_rotation(np.array(base_orientation),target_dir)[:3]
@@ -367,7 +367,7 @@ class Quadrup_env():
 
         # Reward for being in good y direction
         align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 10*(align_vec-1)
+        align = 0 # 10*(align_vec-1)
         
         # Reward for being high
         high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
@@ -386,7 +386,7 @@ class Quadrup_env():
 # # # TEST CODE # # #
 # env = Quadrup_env(
 #                     render_mode     = 'human',
-#                     num_robot       = 9,
+#                     num_robot       = 1,
 #                     debug           = True,
 #                     terrainHeight   = [0. ,0.05],
 #                     )             
