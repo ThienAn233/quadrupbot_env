@@ -46,7 +46,7 @@ previous_pos = np.zeros((len(jointId_list)))
 print('-'*100)
 
 
-def leg_traj(t,T,mag_thigh = 0.785,mag_bicep=0.785):
+def leg_traj(t,T,mag_thigh = 0.3,mag_bicep=0.3):
     return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
 
 
@@ -60,25 +60,26 @@ def get_run_gait(T,t):
 
 # Simulation loop
 time    = 0
-T       = 2*np.pi
+T       = 4*np.pi
 num_step= 10 
 fixed   = False
 
 while True:
+    action = get_run_gait(T,time)
+    filtered_action = (previous_pos*.8 + np.array(action)*.2).flatten()
+    previous_pos = action
     for _ in range(num_step):
         if fixed :
             p.resetBasePositionAndOrientation(robotId,[0.,0.,1.],initial_ori)
+        p.setJointMotorControlArray(robotId,
+                                    jointId_list,
+                                    mode,
+                                    targetPositions = filtered_action,
+                                    forces = jointMaxForce_list, 
+                                    targetVelocities = jointMaxVeloc_list,
+                                    positionGains = np.ones_like(filtered_action)*.2,
+                                    # velocityGains = np.ones_like(temp_debug_value)*0.,        
+                                    )
         p.stepSimulation()
         t.sleep(sleep_time)
-    action = get_run_gait(T,time)
-    filtered_action = (previous_pos*.8 + np.array(action)*.2).flatten()
-    p.setJointMotorControlArray(robotId,
-                                jointId_list,
-                                mode,
-                                targetPositions = filtered_action,
-                                forces = jointMaxForce_list, 
-                                targetVelocities = jointMaxVeloc_list,
-                                positionGains = np.ones_like(filtered_action)*.2,
-                                # velocityGains = np.ones_like(temp_debug_value)*0.,        
-                                )
     time += 1

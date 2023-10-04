@@ -8,7 +8,7 @@ import utils
 class Quadrup_env():
     def __init__(
         self,
-        max_length      = 500,
+        max_length      = 1500,
         num_step        = 10,
         render_mode     = None,
         debug           = False,
@@ -29,7 +29,6 @@ class Quadrup_env():
         self.debug              = debug
         self.robot_file         = robot_file
         self.num_robot          = num_robot 
-        self.target_height      = [0.17, 0.5]
         self.initialVel         = [0, .2]
         self.initialMass        = [0, 1.]
         self.initialPos         = [0, .3]
@@ -49,11 +48,11 @@ class Quadrup_env():
         # Constant DO NOT TOUCH
         self.mode   = p.POSITION_CONTROL
         self.seed   = seed
-        self.sleep_time = 1./1240.
+        self.sleep_time = 1./240.
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 1.5*self.pi
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         self.terrain_shape  = [50, 3*self.num_robot]
@@ -292,7 +291,8 @@ class Quadrup_env():
     
     def act(self,action):
         for robotId in self.robotId_list:
-            p.setJointMotorControlArray(robotId,self.jointId_list,
+            p.setJointMotorControlArray(robotId,
+                                        self.jointId_list,
                                         self.mode,
                                         targetPositions = action[robotId], 
                                         forces = self.jointMaxForce_list, 
@@ -343,7 +343,7 @@ class Quadrup_env():
         return
     
     
-    def leg_traj(self,t,mag_thigh = 0.6,mag_bicep=0.6):
+    def leg_traj(self,t,mag_thigh = 0.3,mag_bicep=0.3):
         return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
@@ -358,28 +358,23 @@ class Quadrup_env():
     def get_reward_value(self,robotId):
         # Reward for high speed in x direction
         velo_vec = np.sum(self.base_lin_vel[robotId]*self.target_dir[robotId])/np.linalg.norm(self.target_dir[robotId])
-        if velo_vec > .25 :
-            speed = 25*velo_vec 
-        if 0 < velo_vec <.25 :
-            speed = 0
-        if velo_vec < 0 :
-            speed = 25*velo_vec
+        speed = velo_vec
 
         # Reward for being in good y direction
-        align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 50*(align_vec-1)
+        # align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
+        align = 0 #50*(align_vec-1)
         
         # Reward for being high
         high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
         
         # Reward for surviving 
-        surv = 20
+        surv = 0
         
         # Reward for minimal force
-        force = (-1e-4)*((self.reaction_force[robotId,:]**2).sum())
+        force = (-1e-7)*((self.reaction_force[robotId,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-3)*((self.contact_force[robotId,:]**2).sum())
+        contact =(-1e-6)*((self.contact_force[robotId,:]**2).sum())
         
         return [speed, align, high, surv, force,  contact]
     
