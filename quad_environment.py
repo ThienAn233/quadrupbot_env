@@ -32,7 +32,7 @@ class Quadrup_env():
         self.initialVel         = [0, .1]
         self.initialMass        = [0, 1.]
         self.initialPos         = [0, .1]
-        self.initialFriction    = [10, 15]
+        self.initialFriction    = [0, .3]
         self.terrainHeight      = terrainHeight
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937 + self.terrainHeight[-1]
@@ -49,8 +49,8 @@ class Quadrup_env():
         self.sleep_time = 1./1240.
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
-        self.pi     = 1.5*np.pi
-        self.T      = self.pi
+        self.pi     = np.pi
+        self.T      = 1.5*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         self.terrain_shape  = [50, 2*self.num_robot]
@@ -140,7 +140,6 @@ class Quadrup_env():
         self.textureId = p.loadTexture('quadrupbot_env//color_map.png')
         p.changeVisualShape(self.terrainId, -1, textureUniqueId = self.textureId)
         p.changeVisualShape(self.terrainId, -1, rgbaColor=[1,1,1,1])
-        p.changeDynamics(self.terrainId,-1,lateralFriction=10)
 
     
     def get_distance_and_ori_and_velocity_from_target(self,robotId):

@@ -4,7 +4,8 @@ import numpy as np
 import time as t
 
 # Variables
-PATH = 'quadrupbot_env\\quadrup.urdf'
+# PATH = 'quadrupbot_env\\quadrup_v0.urdf'
+PATH = "C:\\Users\\Duc Thien An Nguyen\\Desktop\\dog_body_final\\dog_body_final.urdf"
 sleep_time = 1./240.
 initial_height = 0.2937
 initial_ori = [0,0,0,1]
@@ -46,26 +47,32 @@ previous_pos = np.zeros((len(jointId_list)))
 print('-'*100)
 
 
-def leg_traj(t,T,mag_thigh = 0.3,mag_bicep=0.3):
-    return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
+def leg_traj(t,T,mag_thigh = 0.6,mag_bicep=0.6, scheme = 0):
+    if scheme == 0:
+        return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
+    if scheme == 1:
+        return np.hstack([np.zeros_like(t), mag_thigh*np.sin(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
+    if scheme == 2:
+        return np.hstack([np.zeros_like(t), -mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
 
 
-def get_run_gait(T,t):
+def get_run_gait(T,t,scheme):
     t       = np.array(t).reshape((-1,1))
-    act1    = leg_traj(t,T)
-    act2    = leg_traj(t+T/2,T)
+    act1    = leg_traj(t,T,scheme=scheme)
+    act2    = leg_traj(t+T/2,T,scheme=scheme)
     action  = np.hstack([act1,act2,act2,act1])
     return action
 
 
 # Simulation loop
 time    = 0
-T       = 4*np.pi
+T       = 1.5*np.pi
 num_step= 10 
+scheme  = 1 
 fixed   = False
 
 while True:
-    action = get_run_gait(T,time)
+    action = get_run_gait(T,time,scheme)
     filtered_action = (previous_pos*.8 + np.array(action)*.2).flatten()
     previous_pos = action
     for _ in range(num_step):
@@ -77,7 +84,7 @@ while True:
                                     targetPositions = filtered_action,
                                     forces = jointMaxForce_list, 
                                     targetVelocities = jointMaxVeloc_list,
-                                    positionGains = np.ones_like(filtered_action)*.2,
+                                    # positionGains = np.ones_like(filtered_action)*.2,
                                     # velocityGains = np.ones_like(temp_debug_value)*0.,        
                                     )
         p.stepSimulation()

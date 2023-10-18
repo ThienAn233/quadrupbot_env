@@ -1,0 +1,560 @@
+<?xml version="1.0"?>
+<robot name="bipedal" >
+
+
+  <link name="base_link">
+
+    <visual>
+      <geometry>
+        <cylinder radius="0.0107" length="0.44"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0.04 0"/>
+      <material name="grey">
+        <color rgba=".5 .5 .5 1"/>
+      </material>
+    </visual>
+
+    <visual>
+      <geometry>
+        <cylinder radius="0.0107" length="0.44"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 -0.04 0"/>
+      <material name="grey">
+      </material>
+    </visual>
+
+    <visual>
+      <geometry>
+        <box size="0.005 0.15 0.04"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.225 0 0"/>
+      <material name="grey">
+      </material>
+    </visual>
+  
+  	<visual>
+      <geometry>
+        <box size="0.005 0.15 0.04"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0.125 0 0"/>
+      <material name="grey">
+      </material>
+    </visual>
+
+    <visual>
+      <geometry>
+        <box size="0.005 0.15 0.04"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="-0.225 0 0"/>
+      <material name="grey">
+      </material>
+    </visual>
+  
+  	<visual>
+      <geometry>
+        <box size="0.005 0.15 0.04"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="-0.125 0 0"/>
+      <material name="grey">
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.4 0.15 0.1"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value=".5"/>
+      <inertia ixx="0.015"  ixy="0"  ixz="0" iyy="0.015" iyz="0" izz="0.015" />
+    </inertial>
+  </link>
+
+
+
+  <link name="fl_shoulder">
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+      <material name="black">
+        <color rgba="0 0 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+
+
+
+  <joint name="fl_shoulder_to_base" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0 0" xyz="0.175 0.1 -0.03"/>
+    <parent link="base_link"/>
+    <child link="fl_shoulder"/>
+  </joint>
+
+
+
+  <link name="fr_shoulder">
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+      <material name="black">
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="fr_shoulder_to_base" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0 0" xyz="0.175 -0.1 -0.03"/>
+    <parent link="base_link"/>
+    <child link="fr_shoulder"/>
+  </joint>
+
+
+
+  <link name="bl_shoulder">
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+      <material name="black">
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="bl_shoulder_to_base" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0 0" xyz="-0.175 0.1 -0.03"/>
+    <parent link="base_link"/>
+    <child link="bl_shoulder"/>
+  </joint>
+
+
+
+  <link name="br_shoulder">
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+      <material name="black">
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.095"/>
+      </geometry>
+      <origin rpy="0 1.5708 0" xyz="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="br_shoulder_to_base" type="revolute">
+    <axis xyz="1 0 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0 0" xyz="-0.175 -0.1 -0.03"/>
+    <parent link="base_link"/>
+    <child link="br_shoulder"/>
+  </joint>
+
+
+
+  <link name="fl_thigh">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
+      <material name="amber">
+        <color rgba="1 .75 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+
+
+
+  <joint name="fl_thigh_to_shoulder" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0.785 0" xyz="0.01 0.01 -0.04"/>
+    <parent link="fl_shoulder"/>
+    <child link="fl_thigh"/>
+  </joint>
+
+
+
+  <link name="fr_thigh">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
+      <material name="amber">
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="fr_thigh_to_shoulder" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0.785 0" xyz="0.01 -0.01 -0.04"/>
+    <parent link="fr_shoulder"/>
+    <child link="fr_thigh"/>
+  </joint>
+
+
+
+  <link name="bl_thigh">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
+      <material name="amber">
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="bl_thigh_to_shoulder" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0.785 0" xyz="0.01 0.01 -0.04"/>
+    <parent link="bl_shoulder"/>
+    <child link="bl_thigh"/>
+  </joint>
+
+
+
+  <link name="br_thigh">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
+      <material name="amber">
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
+    </collision>
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="br_thigh_to_shoulder" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 0.785 0" xyz="0.01 -0.01 -0.04"/>
+    <parent link="br_shoulder"/>
+    <child link="br_thigh"/>
+  </joint>
+
+
+
+  <link name="fl_bicep">
+    <visual>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+	<visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.15"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
+    </collision>
+
+	<collision>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.15"/>
+    </collision>	
+
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="fl_bicep_to_thigh" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 -1.5708 0" xyz="0 0 -0.1"/>
+    <parent link="fl_thigh"/>
+    <child link="fl_bicep"/>
+  </joint>
+
+
+
+  <link name="fr_bicep">
+    <visual>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+	<visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.15"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
+    </collision>
+
+	<collision>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.15"/>
+    </collision>	
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="fr_bicep_to_thigh" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 -1.5708 0" xyz="0 0 -0.1"/>
+    <parent link="fr_thigh"/>
+    <child link="fr_bicep"/>
+  </joint>
+
+
+
+  <link name="bl_bicep">
+    <visual>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+	<visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.15"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
+    </collision>
+
+	<collision>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 -0.015 -0.15"/>
+    </collision>	
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="bl_bicep_to_thigh" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 -1.5708 0" xyz="0 0 -0.1"/>
+    <parent link="bl_thigh"/>
+    <child link="bl_bicep"/>
+  </joint>
+
+
+
+  <link name="br_bicep">
+    <visual>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+	<visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.15"/>
+      <material name="black">
+      </material>
+    </visual>
+	
+    <collision>
+      <geometry>
+        <box size="0.03 0.03 0.15"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
+    </collision>
+
+	<collision>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0.015 -0.15"/>
+    </collision>	
+
+    <inertial>
+      <mass value=".1"/>
+      <inertia ixx="0.00005"  ixy="0"  ixz="0" iyy="0.00013" iyz="0" izz="0.00018" />
+    </inertial>
+  </link>
+  
+
+
+  <joint name="br_bicep_to_thigh" type="revolute">
+    <axis xyz="0 1 0"/>
+    <limit effort="1.1" lower="-0.785" upper="0.785" velocity="2"/>
+    <origin rpy="0 -1.5708 0" xyz="0 0 -0.1"/>
+    <parent link="br_thigh"/>
+    <child link="br_bicep"/>
+  </joint>
+</robot>

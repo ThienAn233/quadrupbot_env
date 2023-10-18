@@ -17,7 +17,6 @@ class SAC_quad():
         save_model          = True,
         render_mode         = False,
         thresh              = 1.5,
-        epsilon             = 0.2,
         explore             = 1e-4,
         gamma               = .99,
         zeta                = .5,
@@ -47,7 +46,6 @@ class SAC_quad():
         self.save_model         = save_model
         self.render_mode        = render_mode
         self.thresh             = thresh
-        self.epsilon            = epsilon
         self.explore            = explore
         self.gamma              = gamma 
         self.zeta               = zeta
@@ -102,30 +100,55 @@ class SAC_quad():
             class MLP(nn.Module):
                 def __init__(self):
                     super(MLP,self).__init__()
+                    siz = (observation_space//2)*(buffer_length-1-2-4-8-16)
                     # nn setup
-                    conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
-                    conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
-                    conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
-                    conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
-                    conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
-                    self.pre_pros = nn.Sequential(
-                        conv1,
+                    # policy network
+                    policy_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
+                    policy_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
+                    policy_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
+                    policy_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
+                    policy_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
+                    self.policy_pre_pros = nn.Sequential(
+                        policy_conv1,
                         nn.LeakyReLU(.2),
-                        conv2,
+                        policy_conv2,
                         nn.LeakyReLU(.2),
-                        conv3,
+                        policy_conv3,
                         nn.LeakyReLU(.2),
-                        conv4,
+                        policy_conv4,
                         nn.LeakyReLU(.2),
-                        conv5,
+                        policy_conv5,
                         nn.LeakyReLU(.2),
                         nn.Flatten()
                     )
-                    siz = (observation_space//2)*(buffer_length-1-2-4-8-16)
-                    lin1 = nn.Linear(siz,500)
-                    torch.nn.init.xavier_normal_(lin1.weight,gain=1)
-                    lin2 = nn.Linear(500,100)
-                    torch.nn.init.xavier_normal_(lin2.weight,gain=1)
+                    policy_lin1 = nn.Linear(siz,500)
+                    torch.nn.init.xavier_normal_(policy_lin1.weight,gain=1)
+                    policy_lin2 = nn.Linear(500,100)
+                    torch.nn.init.xavier_normal_(policy_lin2.weight,gain=1)
+                    # quality network
+                    quality_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
+                    quality_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
+                    quality_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
+                    quality_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
+                    quality_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
+                    self.quality_pre_pros = nn.Sequential(
+                        quality_conv1,
+                        nn.LeakyReLU(.2),
+                        quality_conv2,
+                        nn.LeakyReLU(.2),
+                        quality_conv3,
+                        nn.LeakyReLU(.2),
+                        quality_conv4,
+                        nn.LeakyReLU(.2),
+                        quality_conv5,
+                        nn.LeakyReLU(.2),
+                        nn.Flatten()
+                    )
+                    
+                    quality_lin1 = nn.Linear(siz,500)
+                    torch.nn.init.xavier_normal_(quality_lin1.weight,gain=1)
+                    quality_lin2 = nn.Linear(500,100)
+                    torch.nn.init.xavier_normal_(quality_lin2.weight,gain=1)
                     lin3 = nn.Linear(100,action_space)
                     torch.nn.init.xavier_normal_(lin3.weight,gain=0.2)
                     lin4 = nn.Linear(100,action_space)
@@ -134,26 +157,26 @@ class SAC_quad():
                     torch.nn.init.xavier_normal_(lin5.weight,gain=1)
                     
                     self.mean = nn.Sequential(
-                        self.pre_pros,
-                        lin1,
+                        self.policy_pre_pros,
+                        policy_lin1,
                         nn.LeakyReLU(.2),
-                        lin2,
+                        policy_lin2,
                         nn.LeakyReLU(.2),
                         lin3,
                     )
                     self.var = nn.Sequential(
-                        self.pre_pros,
-                        lin1,
+                        self.policy_pre_pros,
+                        policy_lin1,
                         nn.LeakyReLU(.2),
-                        lin2,
+                        policy_lin2,
                         nn.LeakyReLU(.2),
                         lin4,
                     )
                     self.critic = nn.Sequential(
-                        self.pre_pros,
-                        lin1,
+                        self.quality_pre_pros,
+                        quality_lin1,
                         nn.LeakyReLU(.2),
-                        lin2,
+                        quality_lin2,
                         nn.LeakyReLU(.2),
                         lin5,
                     )
@@ -163,7 +186,8 @@ class SAC_quad():
         print('MLP is ready!')
         print('params: ',sum(i.numel() for i in self.mlp.parameters()) )
         
-        
+
+            
         # Optim setup
         self.mlp_optimizer = torch.optim.Adam(self.mlp.parameters(),lr = self.learning_rate)
         if load_model:
@@ -179,18 +203,17 @@ class SAC_quad():
             self.writer = SummaryWriter(PATH + '//runs//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
     
     
-    def get_actor_critic_action_and_values(self,obs,eval=True):
-        logits, var, values = self.mlp(obs)
+    def get_actor_critic_action_and_quality(self,obs,eval=True):
+        logits, var, quality = self.mlp(obs)
         old_shape = logits.shape
         logits, var = logits.view(*logits.shape,1), var.view(*var.shape,1)
         probs = TanhNormal(loc = logits, scale=self.zeta*nn.Sigmoid()(var),max=np.pi/4,min=-np.pi/4)
         if eval is True:
             action = probs.sample()
-            return action.view(old_shape), probs.log_prob(action), values
+            return action.view(old_shape), probs.log_prob(action.view(logits.shape)).prod(dim=-1), quality
         else:
             action = eval
-            dummy_action = probs.sample((500,))
-            return action.view(old_shape), probs.log_prob(action.view(logits.shape)), -probs.log_prob(dummy_action).mean(dim=0), values
+            return action.view(old_shape), probs.log_prob(action.view(logits.shape)).prod(dim=-1), quality
     
         
     def get_data_from_env(self,length = None):
@@ -207,9 +230,9 @@ class SAC_quad():
         for i in range(length) :
             
             # Act and get observation 
-            timestep        = np.array(self.env.time_steps_in_current_episode)
-            local_timestep +=[torch.Tensor(timestep.copy())]
-            action, _, _     = self.get_actor_critic_action_and_values(torch.Tensor(observation).to(self.device))
+            timestep                    = np.array(self.env.time_steps_in_current_episode)
+            local_timestep             +=[torch.Tensor(timestep.copy())]
+            action, logprob, _          = self.get_actor_critic_action_and_quality(torch.Tensor(observation).to(self.device))
             action                      = action.cpu()
             local_observation          += [torch.Tensor(observation)]
             local_action               += [torch.Tensor(action)]
@@ -218,7 +241,7 @@ class SAC_quad():
             observation, reward, info   = self.env.sim(np.array(action),real_time=self.real_time,train=self.train_)
             if self.print_rew:
                 print(reward)
-            reward          = np.sum(reward*self.reward_index,axis=-1)
+            reward          = np.sum(reward*self.reward_index,axis=-1) - logprob.numpy()
             
             # Save var
             local_reward   += [torch.Tensor(reward)]
@@ -233,21 +256,24 @@ class SAC_quad():
             # Sample data from the environment
             with torch.no_grad():
                 data = self.get_data_from_env()
-            dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma)
+            dataset = custom_dataset(data,self.data_size,self.num_robot)
             dataloader = DataLoader(dataset,batch_size=self.batch_size,shuffle=True)
             
             for iteration, data in enumerate(dataloader):
                 mlp = mlp.train()
-                obs, action, reward, next_obs               = data
-                obs, action, reward, next_obs               = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device)
-                next_action, next_logprob, entropy, value   = self.get_actor_critic_action_and_values(obs,eval=action)
+                obs, action, reward, next_obs           = data
+                obs, action, reward, next_obs           = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device)
+                _, logprob, quality                     = self.get_actor_critic_action_and_quality(obs,eval=action)
+                with torch.no_grad():
+                    next_action, next_logprob, next_quality = self.get_actor_critic_action_and_quality(next_obs)
                 # Train models
                 self.mlp_optimizer.zero_grad()
-                prob_ratio  = torch.exp(next_logprob-logprob)
-                advantage   = quality-value
-                critic_loss = (advantage**2).mean()
-                entropy_loss= entropy.mean()
-                actor_loss  = - torch.min( prob_ratio*advantage , torch.clamp(prob_ratio, 1-self.epsilon, 1+self.epsilon)*advantage ).mean() - self.explore*entropy_loss
+                TD_residual = reward + self.gamma*next_quality - quality 
+                critic_loss = .5*((TD_residual)**2).mean()
+                if epoch % 4 == 3:
+                    actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)(next_logprob,nn.functional.log_softmax(quality,dim=1).detach())
+                else:
+                    actor_loss  = torch.tensor(0)
                 loss        = critic_loss + actor_loss
                 loss.backward()
                 self.mlp_optimizer.step()
@@ -264,17 +290,16 @@ class SAC_quad():
                 if self.log_data:
                     self.writer.add_scalar('Eval/minibatchreward',reward.mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Eval/minibatchreturn',quality.mean().item(),epoch*(len(dataloader))+iteration)
-                    self.writer.add_scalar('Train/entropyloss',entropy_loss.item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().mean().item(),epoch*(len(dataloader))+iteration)
-                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().mean().item()} act: {actor_loss.detach().mean().item()} entr: {entropy_loss.detach().item()}')
+                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()}')
         torch.save(mlp.state_dict(), self.PATH+'models//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
         torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
         
 
 class custom_dataset(Dataset):
     
-    def __init__(self,data,data_size,num_robot,verbose = True):
+    def __init__(self,data,data_size,num_robot,verbose = False):
         self.data_size = data_size
         self.num_robot = num_robot
         self.obs, self.action, self.reward, self.timestep = data       
@@ -282,6 +307,7 @@ class custom_dataset(Dataset):
         self.local_action = torch.hstack(self.action).reshape((num_robot*data_size,*self.action[0].shape[1:]))
         self.local_reward = torch.stack(self.reward,dim=1).reshape((num_robot*data_size,*self.reward[0].shape[1:])).view(-1,1)
         self.local_timestep = torch.stack(self.timestep,dim=1).reshape((num_robot*data_size,*self.timestep[0].shape[1:])).view(-1,1)
+        self.check_time()
         if verbose:
             print(self.local_observation.shape)
             print(self.local_action.shape)
@@ -318,12 +344,11 @@ class custom_dataset(Dataset):
 trainer = SAC_quad(
                 num_robot = 9,
                 learning_rate = 1e-4,
-                data_size = 20,
-                batch_size = 1,
+                data_size = 200,
+                batch_size = 100,
                 epochs=100,
                 thresh=1,
                 explore = 1e-2,
-                epsilon = 0.2,
                 log_data = False,
                 save_model = False,
                 render_mode= True,

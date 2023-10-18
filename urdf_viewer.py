@@ -4,7 +4,8 @@ import numpy as np
 import time as t
 
 # Variables
-PATH = 'quadrupbot_env\\quadrup.urdf'
+# PATH = 'quadrupbot_env\\quadrup_v0.urdf'
+PATH = "C:\\Users\\Duc Thien An Nguyen\\Desktop\\Model_DoAn_Group_Global_ASM_171023\\urdf\\Model_DoAn_Group_Global_ASM_171023.urdf"
 sleep_time = 1./240.
 initial_height = 1.
 initial_ori = [0,0,0,1]
