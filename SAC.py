@@ -341,17 +341,17 @@ class custom_dataset(Dataset):
 # print(out)
 # print(out.shape)
 
-trainer = SAC_quad(
-                num_robot = 9,
-                learning_rate = 1e-4,
-                data_size = 200,
-                batch_size = 100,
-                epochs=100,
-                thresh=1,
-                explore = 1e-2,
-                log_data = False,
-                save_model = False,
-                render_mode= True,
-                run=1,
-                )
-trainer.train()
+# trainer = SAC_quad(
+#                 num_robot = 9,
+#                 learning_rate = 1e-4,
+#                 data_size = 200,
+#                 batch_size = 100,
+#                 epochs=100,
+#                 thresh=1,
+#                 explore = 1e-2,
+#                 log_data = False,
+#                 save_model = False,
+#                 render_mode= True,
+#                 run=1,
+#                 )
+# trainer.train()
