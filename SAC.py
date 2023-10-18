@@ -233,7 +233,7 @@ class SAC_quad():
             timestep                    = np.array(self.env.time_steps_in_current_episode)
             local_timestep             +=[torch.Tensor(timestep.copy())]
             action, logprob, _          = self.get_actor_critic_action_and_quality(torch.Tensor(observation).to(self.device))
-            action                      = action.cpu()
+            action, logprob             = action.cpu(), logprob.cpu()
             local_observation          += [torch.Tensor(observation)]
             local_action               += [torch.Tensor(action)]
             if self.run:
