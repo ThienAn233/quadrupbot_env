@@ -73,8 +73,8 @@ class SAC_quad():
         
         # Load model path and device
         if load_model:
-            self.model_path = PATH + '//models//PPO_cnn//' + load_model
-            self.optim_path = PATH + '//models//PPO_cnn//' + load_model + '_optim'
+            self.model_path = PATH + '//models//SAC//' + load_model
+            self.optim_path = PATH + '//models//SAC//' + load_model + '_optim'
         if self.device:
             pass
         else:
@@ -200,7 +200,7 @@ class SAC_quad():
         
         # Tensor board
         if self.log_data:
-            self.writer = SummaryWriter(PATH + '//runs//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
+            self.writer = SummaryWriter(PATH + '//runs//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
     
     
     def get_actor_critic_action_and_quality(self,obs,eval=True):
@@ -256,7 +256,7 @@ class SAC_quad():
             # Sample data from the environment
             with torch.no_grad():
                 data = self.get_data_from_env()
-            dataset = custom_dataset(data,self.data_size,self.num_robot)
+            dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma,verbose=True)
             dataloader = DataLoader(dataset,batch_size=self.batch_size,shuffle=True)
             
             for iteration, data in enumerate(dataloader):
@@ -282,8 +282,8 @@ class SAC_quad():
                 if self.save_model:
                     if (quality.mean().item()>best_reward and quality.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
                         best_reward = quality.mean().item()
-                        torch.save(mlp.state_dict(), self.PATH+'models//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
-                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
+                        torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
+                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
                         print('saved at: '+str(round(quality.mean().item(),2)))
                 
                 # logging info
@@ -293,27 +293,44 @@ class SAC_quad():
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().item(),epoch*(len(dataloader))+iteration)
                 print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()}')
-        torch.save(mlp.state_dict(), self.PATH+'models//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
-        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//PPO_cnn//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
+        torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
+        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
         
 
 class custom_dataset(Dataset):
     
-    def __init__(self,data,data_size,num_robot,verbose = False):
-        self.data_size = data_size
-        self.num_robot = num_robot
+    def __init__(self,data,data_size,num_robot,gamma,verbose = False):
+        self.data_size  = data_size
+        self.num_robot  = num_robot
+        self.gamma      = gamma
         self.obs, self.action, self.reward, self.timestep = data       
+        self.local_return = [0 for i in range(data_size)]
+        self.calculate_return()
+        self.local_return = torch.hstack(self.local_return).reshape((num_robot*data_size,*self.local_return[0].shape[1:])).view(-1,1)
         self.local_observation = torch.hstack(self.obs).reshape((num_robot*data_size,*self.obs[0].shape[1:]))
         self.local_action = torch.hstack(self.action).reshape((num_robot*data_size,*self.action[0].shape[1:]))
         self.local_reward = torch.stack(self.reward,dim=1).reshape((num_robot*data_size,*self.reward[0].shape[1:])).view(-1,1)
         self.local_timestep = torch.stack(self.timestep,dim=1).reshape((num_robot*data_size,*self.timestep[0].shape[1:])).view(-1,1)
         self.check_time()
         if verbose:
+            print(self.local_return.shape)
             print(self.local_observation.shape)
             print(self.local_action.shape)
             print(self.local_reward.shape)
             print(self.local_timestep.shape)
-            
+
+    def isnt_end(self, i):
+        ### THE FIRST EPS WILL BE TIMESTEP 1, THE FINAL EP WILL BE TIMESTEP 0
+        return self.timestep[i] != 0
+    
+    def calculate_return(self):
+        for i in range(self.data_size-1,-1,-1):
+            if i == self.data_size-1 :
+                self.local_return[i] = self.reward[i]
+            else:
+                self.local_return[i] = self.reward[i] + self.isnt_end(i)*self.gamma*self.local_return[i+1]
+        return self.local_return
+    
     def check_time(self):
         self.index = []
         for index in range(len(self.local_timestep)):
@@ -333,25 +350,17 @@ class custom_dataset(Dataset):
         return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1]
 
 # # # TEST CODE # # #
-# obs = []
-# for i in range(10):
-#     obs += [i*np.ones((3,4,5))]
-# # out = np.hstack(obs).reshape(30,4,5)
-# out = np.vstack(obs)
-# print(out)
-# print(out.shape)
-
-# trainer = SAC_quad(
-#                 num_robot = 9,
-#                 learning_rate = 1e-4,
-#                 data_size = 200,
-#                 batch_size = 100,
-#                 epochs=100,
-#                 thresh=1,
-#                 explore = 1e-2,
-#                 log_data = False,
-#                 save_model = False,
-#                 render_mode= True,
-#                 run=1,
-#                 )
-# trainer.train()
+trainer = SAC_quad(
+                num_robot = 9,
+                learning_rate = 1e-4,
+                data_size = 20,
+                batch_size = 10,
+                epochs=100,
+                thresh=1,
+                explore = 1e-2,
+                log_data = False,
+                save_model = False,
+                render_mode= True,
+                run=1,
+                )
+trainer.train()
