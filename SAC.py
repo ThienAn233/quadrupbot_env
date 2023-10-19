@@ -256,7 +256,7 @@ class SAC_quad():
             # Sample data from the environment
             with torch.no_grad():
                 data = self.get_data_from_env()
-            dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma,verbose=True)
+            dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma,verbose=False)
             dataloader = DataLoader(dataset,batch_size=self.batch_size,shuffle=True)
             
             for iteration, data in enumerate(dataloader):
@@ -350,17 +350,17 @@ class custom_dataset(Dataset):
         return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1]
 
 # # # TEST CODE # # #
-trainer = SAC_quad(
-                num_robot = 9,
-                learning_rate = 1e-4,
-                data_size = 20,
-                batch_size = 10,
-                epochs=100,
-                thresh=1,
-                explore = 1e-2,
-                log_data = False,
-                save_model = False,
-                render_mode= True,
-                run=1,
-                )
-trainer.train()
+# trainer = SAC_quad(
+#                 num_robot = 9,
+#                 learning_rate = 1e-4,
+#                 data_size = 20,
+#                 batch_size = 10,
+#                 epochs=100,
+#                 thresh=1,
+#                 explore = 1e-2,
+#                 log_data = False,
+#                 save_model = False,
+#                 render_mode= True,
+#                 run=1,
+#                 )
+# trainer.train()
