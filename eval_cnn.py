@@ -4,7 +4,7 @@ import quad_cnn_env_no_contact as qa
 eval = PPO_cnn.PPO_quad(
     load_model      = '2023-09-27-16-58-18',     
     envi            = qa,
-    num_robot       = 3,
+    num_robot       = 2,
     learning_rate   = 0,
     data_size       = 500,
     batch_size      = 500*2,

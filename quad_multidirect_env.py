@@ -256,11 +256,11 @@ class Quadrup_env():
     
     
     def truncation_check(self,ori,client):
-        return  (self.time_steps_in_current_episode[client]>self.max_length) | (ori<.5) | (np.abs(self.base_pos[client,1]) > (.5*self.terrain_shape[1])) | (np.abs(self.base_pos[client,0]) > (.5*self.terrain_shape[0]))
+        return  (self.time_steps_in_current_episode[client]>self.max_length) | (ori<.5)
     
     
     def auto_reset(self,client):
-        ori, dir = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client]), np.sum(self.target_dir_robot[client][0])/np.linalg.norm(self.target_dir_robot[client])
+        ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
         truncation = self.truncation_check(ori,client)
         if truncation:
             self.sample_target(client)
@@ -278,11 +278,11 @@ class Quadrup_env():
         for client in self.clientId:
             # GET OBSERVATION
             self.update_buffer(client)
+            # GET REWARD
+            temp_reward_value += [self.get_reward_value(client)]
             # GET INFO
             if train:
                 temp_info += [self.auto_reset(client)]
-            # GET REWARD
-            temp_reward_value += [self.get_reward_value(client)]
         return self.obs_buffer, np.array(temp_reward_value), np.array(temp_info)
     
     
@@ -358,11 +358,12 @@ class Quadrup_env():
         align_vec = np.sum(self.target_dir_robot[client][0])/np.linalg.norm(self.target_dir_robot[client])
         align = align_vec
         
-        # Reward for being high
-        high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
+        # Reward for termination
+        ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
+        high = -10 if ori < .5 else 0
         
         # Reward for surviving 
-        surv = 0
+        surv = 0.1
         
         # Reward for minimal force
         force = (-1e-7)*((self.reaction_force[client,:]**2).sum())

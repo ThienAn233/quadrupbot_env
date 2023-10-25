@@ -2,9 +2,9 @@ import SAC
 import quad_cnn_env_no_contact as qa
 
 eval = SAC.SAC_quad(
-    load_model      = '2023-10-18-16-41-34_best_93.52',     
+    # load_model      = '2023-10-23-15-49-17_best_191.75',     
     envi            = qa,
-    num_robot       = 2,
+    num_robot       = 3,
     learning_rate   = 0,
     data_size       = 10,#500,
     batch_size      = 20,#500*2,
@@ -18,9 +18,9 @@ eval = SAC.SAC_quad(
     print_rew       = True,
     real_time       = False,
     train_          = True,
-    zeta            = 0.5,
-    terrain_height  = [0., 0.05],
-    debug           = True,
+    zeta            = 0.05,
+    terrain_height  = [0., 0.0  ],
+    debug           = False,
     run             = 1    
 )
 eval.train()

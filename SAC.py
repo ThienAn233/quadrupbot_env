@@ -261,14 +261,13 @@ class SAC_quad():
             
             for iteration, data in enumerate(dataloader):
                 mlp = mlp.train()
-                obs, action, reward, next_obs           = data
-                obs, action, reward, next_obs           = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device)
-                _, logprob, quality                     = self.get_actor_critic_action_and_quality(obs,eval=action)
-                with torch.no_grad():
-                    next_action, next_logprob, next_quality = self.get_actor_critic_action_and_quality(next_obs)
+                obs, action, reward, next_obs, realreturn   = data
+                obs, action, reward, next_obs, realreturn   = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device), realreturn.to(self.device)
+                _, logprob, quality                         = self.get_actor_critic_action_and_quality(obs,eval=action)
+                next_action, next_logprob, next_quality = self.get_actor_critic_action_and_quality(next_obs)
                 # Train models
                 self.mlp_optimizer.zero_grad()
-                TD_residual = reward + self.gamma*next_quality - quality 
+                TD_residual = realreturn - quality 
                 critic_loss = .5*((TD_residual)**2).mean()
                 if epoch % 4 == 3:
                     actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)(next_logprob,nn.functional.log_softmax(quality,dim=1).detach())
@@ -279,20 +278,20 @@ class SAC_quad():
                 self.mlp_optimizer.step()
                 #save model
                 if self.save_model:
-                    if (quality.mean().item()>best_reward and quality.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
-                        best_reward = quality.mean().item()
-                        torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
-                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
-                        print('saved at: '+str(round(quality.mean().item(),2)))
+                    if (realreturn.mean().item()>best_reward and realreturn.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
+                        best_reward = realreturn.mean().item()
+                        torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(realreturn.mean().item(),2)))
+                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(realreturn.mean().item(),2))+'_optim')
+                        print('saved at: '+str(round(realreturn.mean().item(),2)))
                 
                 # logging info
                 if self.log_data:
                     self.writer.add_scalar('Eval/minibatchreward',reward.mean().item(),epoch*(len(dataloader))+iteration)
-                    self.writer.add_scalar('Eval/minibatchreturn',quality.mean().item(),epoch*(len(dataloader))+iteration)
+                    self.writer.add_scalar('Eval/minibatchreturn',realreturn.mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/entropy',-logprob.mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().item(),epoch*(len(dataloader))+iteration)
-                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()}')
+                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(realreturn.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()}')
         torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
         torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
         
@@ -306,7 +305,7 @@ class custom_dataset(Dataset):
         self.obs, self.action, self.reward, self.timestep = data       
         self.local_return = [0 for i in range(data_size)]
         self.calculate_return()
-        self.local_return = torch.hstack(self.local_return).reshape((num_robot*data_size,*self.local_return[0].shape[1:])).view(-1,1)
+        self.local_return = torch.stack(self.local_return,dim=1).reshape((num_robot*data_size,*self.local_return[0].shape[1:])).view(-1,1)
         self.local_observation = torch.hstack(self.obs).reshape((num_robot*data_size,*self.obs[0].shape[1:]))
         self.local_action = torch.hstack(self.action).reshape((num_robot*data_size,*self.action[0].shape[1:]))
         self.local_reward = torch.stack(self.reward,dim=1).reshape((num_robot*data_size,*self.reward[0].shape[1:])).view(-1,1)
@@ -347,7 +346,7 @@ class custom_dataset(Dataset):
     
     def __getitem__(self, index):
         idx = self.index[index]
-        return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1]
+        return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1], self.local_return[idx]
 
 # # # TEST CODE # # #
 # trainer = SAC_quad(

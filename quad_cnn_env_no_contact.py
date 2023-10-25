@@ -153,10 +153,11 @@ class Quadrup_env():
             x = np.linspace(-np.pi/2,self.terrain_shape[0],numHeightfieldRows)
             y = np.linspace(-self.terrain_shape[1]/(2*self.num_robot),self.terrain_shape[1]/(2*self.num_robot),int(numHeightfieldColumns/self.num_robot))
             xx, yy = np.meshgrid(x,y)
-            if i % 3 == 0 :
+            # zz = np.random.uniform(*self.terrainHeight,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
+            if i % 3 == 1 :
                 a, b, c = np.random.uniform(0.05,0.15), np.random.uniform(1,1.5), np.random.uniform(1,1.5)
                 zz = a*(np.cos(b*xx)+np.cos(c*yy)) + np.random.uniform(self.terrainHeight[0]/2,self.terrainHeight[1]/2,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
-            if i % 3 == 1 :
+            if i % 3 == 0 :
                 zz = np.random.uniform(*self.terrainHeight,(int(numHeightfieldColumns/self.num_robot),numHeightfieldRows))
             if i % 3 == 2 :
                 a, b, c =  np.random.uniform(0.2,.4), np.random.uniform(0.2,.5), np.random.uniform(0.1,.4)
