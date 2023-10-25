@@ -56,7 +56,7 @@ class Quadrup_env():
         self.T      = self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
-        self.terrain_shape  = [10, 10]
+        self.terrain_shape  = [20, 20]
         self.feet_list = [2,5,8,11]
         self.control_body       = np.zeros((self.num_robot,3))
         self.control_face       = np.zeros((self.num_robot,3))

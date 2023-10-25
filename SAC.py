@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import time as t
-import quad_cnn_env as qe
+import quad_multidirect_env as qe
 from torch.utils.data import Dataset, DataLoader
 from torchrl.modules import TanhNormal
 from torch.utils.tensorboard import SummaryWriter
@@ -359,7 +359,7 @@ class custom_dataset(Dataset):
 #                 explore = 1e-2,
 #                 log_data = False,
 #                 save_model = False,
-#                 render_mode= True,
+#                 render_mode= False,
 #                 run=1,
 #                 )
 # trainer.train()
