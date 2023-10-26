@@ -7,7 +7,7 @@ import utils
 class Quadrup_env():
     def __init__(
         self,
-        max_length      = 2000,
+        max_length      = 500,
         num_step        = 10,
         render_mode     = None,
         debug           = False,
@@ -15,7 +15,7 @@ class Quadrup_env():
         num_robot       = 9,
         terrainHeight   = [0., 0.05],
         seed            = 0,
-        buffer_length   =60,
+        buffer_length   = 60,
     ):
         # Configurable variables
         self.clientId           = []
@@ -352,7 +352,7 @@ class Quadrup_env():
     def get_reward_value(self,client):
         # Reward for high speed in target velocity direction
         velo_vec = np.sum(self.base_lin_vel[client]*self.target_vel_robot[client])/np.linalg.norm(self.target_dir_robot[client])
-        speed = velo_vec
+        speed = 5*velo_vec
 
         # Reward for being in good target direction
         align_vec = np.sum(self.target_dir_robot[client][0])/np.linalg.norm(self.target_dir_robot[client])
@@ -360,7 +360,7 @@ class Quadrup_env():
         
         # Reward for termination
         ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
-        high = -10 if ori < .5 else 0
+        high = -20 if ori < .5 else 0
         
         # Reward for surviving 
         surv = 0.1

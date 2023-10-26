@@ -4,7 +4,7 @@ import numpy as np
 import time as t
 import quad_multidirect_env as qe
 from torch.utils.data import Dataset, DataLoader
-from torchrl.modules import TanhNormal
+from torch.distributions import Normal
 from torch.utils.tensorboard import SummaryWriter
 
 class SAC_quad():
@@ -17,7 +17,6 @@ class SAC_quad():
         save_model          = True,
         render_mode         = False,
         thresh              = 1.5,
-        explore             = 1e-4,
         gamma               = .99,
         zeta                = .5,
         learning_rate       = 1e-4,
@@ -36,6 +35,7 @@ class SAC_quad():
         train_              = True,
         debug               = False,
         run                 = None,
+        temp                = 1,
         ):
         
         
@@ -46,7 +46,6 @@ class SAC_quad():
         self.save_model         = save_model
         self.render_mode        = render_mode
         self.thresh             = thresh
-        self.explore            = explore
         self.gamma              = gamma 
         self.zeta               = zeta
         self.learning_rate      = learning_rate 
@@ -65,6 +64,7 @@ class SAC_quad():
         self.train_             = train_
         self.debug              = debug 
         self.run                = run
+        self.temp               = temp
         
         # Setup random seed
         torch.manual_seed(self.seed)
@@ -205,15 +205,13 @@ class SAC_quad():
     
     def get_actor_critic_action_and_quality(self,obs,eval=True):
         logits, var, quality = self.mlp(obs)
-        old_shape = logits.shape
-        logits, var = logits.view(*logits.shape,1), var.view(*var.shape,1)
-        probs = TanhNormal(loc = logits, scale=self.zeta*nn.Sigmoid()(var),max=np.pi/4,min=-np.pi/4)
+        probs = Normal(loc = logits, scale=self.zeta*nn.Sigmoid()(var))
         if eval is True:
             action = probs.sample()
-            return action.view(old_shape), probs.log_prob(action.view(logits.shape)).prod(dim=-1), quality
+            return action, probs.log_prob(action).prod(dim=1), quality
         else:
             action = eval
-            return action.view(old_shape), probs.log_prob(action.view(logits.shape)).prod(dim=-1), quality
+            return action, probs.log_prob(action).prod(dim=1), quality
     
         
     def get_data_from_env(self,length = None):
@@ -241,7 +239,7 @@ class SAC_quad():
             observation, reward, info   = self.env.sim(np.array(action),real_time=self.real_time,train=self.train_)
             if self.print_rew:
                 print(reward)
-            reward          = np.sum(reward*self.reward_index,axis=-1) - logprob.numpy()
+            reward          = np.sum(reward*self.reward_index,axis=-1) - (1/self.temp)*logprob.numpy()
             
             # Save var
             local_reward   += [torch.Tensor(reward)]
@@ -252,7 +250,7 @@ class SAC_quad():
         best_reward = 0
         for epoch in range(self.epochs):
             mlp = self.mlp.eval()
-            
+            self.temp *=1.1
             # Sample data from the environment
             with torch.no_grad():
                 data = self.get_data_from_env()
@@ -265,17 +263,6 @@ class SAC_quad():
                 obs, action, reward, next_obs, realreturn   = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device), realreturn.to(self.device)
                 _, logprob, quality                         = self.get_actor_critic_action_and_quality(obs,eval=action)
                 next_action, next_logprob, next_quality = self.get_actor_critic_action_and_quality(next_obs)
-                # Train models
-                self.mlp_optimizer.zero_grad()
-                TD_residual = realreturn - quality 
-                critic_loss = .5*((TD_residual)**2).mean()
-                if epoch % 4 == 3:
-                    actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)(next_logprob,nn.functional.log_softmax(quality,dim=1).detach())
-                else:
-                    actor_loss  = torch.tensor(0)
-                loss        = critic_loss + actor_loss
-                loss.backward()
-                self.mlp_optimizer.step()
                 #save model
                 if self.save_model:
                     if (realreturn.mean().item()>best_reward and realreturn.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
@@ -283,7 +270,14 @@ class SAC_quad():
                         torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(realreturn.mean().item(),2)))
                         torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(realreturn.mean().item(),2))+'_optim')
                         print('saved at: '+str(round(realreturn.mean().item(),2)))
-                
+                # Train models
+                self.mlp_optimizer.zero_grad()
+                TD_residual = .5*((realreturn - quality) + (reward + self.gamma*next_quality.detach()-quality))
+                critic_loss = .5*((TD_residual)**2).mean()
+                actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)(next_logprob,nn.functional.log_softmax(quality,dim=1).detach().squeeze())
+                loss        = critic_loss + actor_loss
+                loss.backward()
+                self.mlp_optimizer.step()
                 # logging info
                 if self.log_data:
                     self.writer.add_scalar('Eval/minibatchreward',reward.mean().item(),epoch*(len(dataloader))+iteration)
@@ -359,7 +353,7 @@ class custom_dataset(Dataset):
 #                 explore = 1e-2,
 #                 log_data = False,
 #                 save_model = False,
-#                 render_mode= False,
+#                 render_mode= None,
 #                 run=1,
 #                 )
 # trainer.train()

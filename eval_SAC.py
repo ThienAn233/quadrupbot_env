@@ -1,26 +1,25 @@
 import SAC
-import quad_cnn_env_no_contact as qa
+import quad_multidirect_env as qa
 
-eval = SAC.SAC_quad(
-    # load_model      = '2023-10-23-15-49-17_best_191.75',     
+trainer = SAC.SAC_quad(
     envi            = qa,
-    num_robot       = 3,
+    load_model      = '2023-10-26-03-12-50_best_51.67',
+    num_robot       = 1,
     learning_rate   = 0,
-    data_size       = 10,#500,
-    batch_size      = 20,#500*2,
+    data_size       = 2000,
+    batch_size      = 500,
     epochs          = 10000,
-    thresh          = 2.,
-    explore         = 1e-2,
+    thresh          = 10.,
+    zeta            = 0.4,
     log_data        = False,
     save_model      = False,
-    render_mode     = True, 
-    norm            = False,
+    render_mode     = "human",
+    debug           = True,
+    terrain_height  = [0., 0.0],
+    run             = 0,
     print_rew       = True,
     real_time       = False,
-    train_          = True,
-    zeta            = 0.05,
-    terrain_height  = [0., 0.0  ],
-    debug           = False,
-    run             = 1    
+    train_          = False,
+    temp            = 9999,
 )
-eval.train()
+trainer.train()
