@@ -282,10 +282,11 @@ class SAC_quad():
                 if self.log_data:
                     self.writer.add_scalar('Eval/minibatchreward',reward.mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Eval/minibatchreturn',realreturn.mean().item(),epoch*(len(dataloader))+iteration)
+                    self.writer.add_scalar('Eval/estreturn',quality.detach().mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/entropy',-logprob.mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().item(),epoch*(len(dataloader))+iteration)
-                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(realreturn.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()}')
+                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(realreturn.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()} estqua: {quality.mean().detach().item()}')
         torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
         torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
         
@@ -343,16 +344,16 @@ class custom_dataset(Dataset):
         return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1], self.local_return[idx]
 
 # # # TEST CODE # # #
-# trainer = SAC_quad(
-#                 num_robot = 9,
-#                 learning_rate = 1e-4,
-#                 data_size = 20,
-#                 batch_size = 10,
-#                 epochs=100,
-#                 thresh=1,
-#                 log_data = False,
-#                 save_model = False,
-#                 render_mode= None,
-#                 run=1,
-#                 )
-# trainer.train()
+trainer = SAC_quad(
+                num_robot = 9,
+                learning_rate = 1e-4,
+                data_size = 20,
+                batch_size = 10,
+                epochs=100,
+                thresh=1,
+                log_data = False,
+                save_model = False,
+                render_mode= None,
+                run=1,
+                )
+trainer.train()
