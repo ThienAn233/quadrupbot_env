@@ -272,7 +272,7 @@ class SAC_quad():
                         print('saved at: '+str(round(realreturn.mean().item(),2)))
                 # Train models
                 self.mlp_optimizer.zero_grad()
-                TD_residual = (reward + self.gamma*next_quality.detach()-quality)
+                TD_residual = realreturn - quality
                 critic_loss = .5*((TD_residual)**2).mean()
                 actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)((next_logprob),nn.functional.log_softmax(quality,dim=1).detach().squeeze())
                 loss        = critic_loss + actor_loss
