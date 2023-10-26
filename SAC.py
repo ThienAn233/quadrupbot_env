@@ -274,7 +274,7 @@ class SAC_quad():
                 self.mlp_optimizer.zero_grad()
                 TD_residual = .5*((realreturn - quality) + (reward + self.gamma*next_quality.detach()-quality))
                 critic_loss = .5*((TD_residual)**2).mean()
-                actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)((logprob),nn.functional.log_softmax(quality,dim=1).detach().squeeze())
+                actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)((next_logprob),nn.functional.log_softmax(quality,dim=1).detach().squeeze())
                 loss        = critic_loss + actor_loss
                 loss.backward()
                 self.mlp_optimizer.step()
