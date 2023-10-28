@@ -208,10 +208,10 @@ class SAC_quad():
         probs = Normal(loc = logits, scale=self.zeta*nn.Sigmoid()(var))
         if eval is True:
             action = probs.sample()
-            return action, probs.log_prob(action).prod(dim=1), quality
+            return action, probs.log_prob(action).sum(dim=1), quality
         else:
             action = eval
-            return action, probs.log_prob(action).prod(dim=1), quality
+            return action, probs.log_prob(action).sum(dim=1), quality
     
         
     def get_data_from_env(self,length = None):
