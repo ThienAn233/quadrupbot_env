@@ -4,8 +4,7 @@ import numpy as np
 import time as t
 
 # Variables
-# PATH = 'quadrupbot_env\\quadrup_v0.urdf'
-PATH = "C:\\Users\\Duc Thien An Nguyen\\Desktop\\dog_body_final\\dog_body_final.urdf"
+PATH = 'quadrupbot_env\\quadrupv1.urdf'
 sleep_time = 1./240.
 initial_height = 0.2937
 initial_ori = [0,0,0,1]
@@ -69,7 +68,7 @@ time    = 0
 T       = 1.5*np.pi
 num_step= 10 
 scheme  = 1 
-fixed   = False
+fixed   = True
 
 while True:
     action = get_run_gait(T,time,scheme)

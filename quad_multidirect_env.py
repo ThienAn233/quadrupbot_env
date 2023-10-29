@@ -215,14 +215,14 @@ class Quadrup_env():
         self.target_dir_robot[client] = target_dir
         temp_obs_vaule += [*target_dir]
         # Calculate target velodirect
-        target_vel = self.target_vel_world[client] + base_pos
-        target_vel = np.array(list(target_vel)+[0])
-        target_vel = target_vel/np.linalg.norm(target_vel)
-        target_vel = utils.active_rotation(np.array(base_orientation),target_vel)[:3]
-        target_vel = np.array([target_vel[0],target_vel[1],0])
-        target_vel = target_vel/np.linalg.norm(target_vel)
-        self.target_vel_robot[client] = target_vel
-        temp_obs_vaule += [*target_vel]
+        # target_vel = self.target_vel_world[client] + base_pos
+        # target_vel = np.array(list(target_vel)+[0])
+        # target_vel = target_vel/np.linalg.norm(target_vel)
+        # target_vel = utils.active_rotation(np.array(base_orientation),target_vel)[:3]
+        # target_vel = np.array([target_vel[0],target_vel[1],0])
+        # target_vel = target_vel/np.linalg.norm(target_vel)
+        # self.target_vel_robot[client] = target_vel
+        # temp_obs_vaule += [*target_vel]
         return temp_obs_vaule
     
     
@@ -332,13 +332,13 @@ class Quadrup_env():
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+np.array([0,0.2,0]),lineWidth = 2, lifeTime =.5, lineColorRGB = [0,1,0],physicsClientId = client)
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+np.array([0.2,0,0]),lineWidth = 2, lifeTime =.5, lineColorRGB = [1,0,0],physicsClientId = client)
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+self.base_lin_vel[client],lineWidth = 2, lifeTime =.5, lineColorRGB = [0,0,0],physicsClientId = client)
-        p.addUserDebugLine([0,0,1],np.array([0,0,1])+self.target_vel_robot[client],lineWidth = 2, lifeTime =.5, lineColorRGB = [1,1,1],physicsClientId = client)
+        # p.addUserDebugLine([0,0,1],np.array([0,0,1])+self.target_vel_robot[client],lineWidth = 2, lifeTime =.5, lineColorRGB = [1,1,1],physicsClientId = client)
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+self.target_dir_robot[client],lineWidth = 2, lifeTime =.5, lineColorRGB = [.5,.5,.5],physicsClientId = client)
         return
     
     
     def leg_traj(self,t,mag_thigh = 0.3,mag_bicep=0.3):
-        return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+        return np.hstack([np.zeros_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
     def get_run_gait(self,t):
@@ -374,21 +374,21 @@ class Quadrup_env():
         return [speed, align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
-# env = Quadrup_env(  render_mode     = 'human',
-#                     num_robot       = 2,
-#                     debug           = True,
-#                     terrainHeight   = [0. ,0.05],
-#                   )
-# for time in range(1000):
-#     # print(env.time_steps_in_current_episode)
-#     action = env.get_run_gait(env.time_steps_in_current_episode)
-#     # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
-#     obs, rew, inf = env.sim(action,real_time=True)
-#     # t.sleep(1./240.)
-#     # t.sleep(.5)
-#     # print(obs.shape,rew.shape,inf.shape)
-#     # print(env.time_steps_in_current_episode)
-#     # print(time,obs[0])
-#     # print(rew[0])
-#     # print(inf[0])
-#     # print('-'*100)
+env = Quadrup_env(  render_mode     = 'human',
+                    num_robot       = 2,
+                    debug           = True,
+                    terrainHeight   = [0. ,0.05],
+                  )
+for time in range(1000):
+    # print(env.time_steps_in_current_episode)
+    action = env.get_run_gait(env.time_steps_in_current_episode)
+    # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
+    obs, rew, inf = env.sim(action,real_time=True)
+    # t.sleep(1./240.)
+    # t.sleep(.5)
+    # print(obs.shape,rew.shape,inf.shape)
+    # print(env.time_steps_in_current_episode)
+    # print(time,obs[0])
+    # print(rew[0])
+    # print(inf[0])
+    # print('-'*100)
