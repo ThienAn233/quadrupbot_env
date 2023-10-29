@@ -374,21 +374,21 @@ class Quadrup_env():
         return [speed, align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
-env = Quadrup_env(  render_mode     = 'human',
-                    num_robot       = 2,
-                    debug           = True,
-                    terrainHeight   = [0. ,0.05],
-                  )
-for time in range(1000):
-    # print(env.time_steps_in_current_episode)
-    action = env.get_run_gait(env.time_steps_in_current_episode)
-    # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
-    obs, rew, inf = env.sim(action,real_time=True)
-    # t.sleep(1./240.)
-    # t.sleep(.5)
-    # print(obs.shape,rew.shape,inf.shape)
-    # print(env.time_steps_in_current_episode)
-    # print(time,obs[0])
-    # print(rew[0])
-    # print(inf[0])
-    # print('-'*100)
+# env = Quadrup_env(  render_mode     = 'human',
+#                     num_robot       = 2,
+#                     debug           = True,
+#                     terrainHeight   = [0. ,0.05],
+#                   )
+# for time in range(1000):
+#     # print(env.time_steps_in_current_episode)
+#     action = env.get_run_gait(env.time_steps_in_current_episode)
+#     # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
+#     obs, rew, inf = env.sim(action,real_time=True)
+#     # t.sleep(1./240.)
+#     # t.sleep(.5)
+#     # print(obs.shape,rew.shape,inf.shape)
+#     # print(env.time_steps_in_current_episode)
+#     # print(time,obs[0])
+#     # print(rew[0])
+#     # print(inf[0])
+#     # print('-'*100)
