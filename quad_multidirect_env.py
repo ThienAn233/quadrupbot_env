@@ -351,7 +351,7 @@ class Quadrup_env():
     
     def get_reward_value(self,client):
         # Reward for high speed in target velocity direction
-        velo_vec = np.sum(self.base_lin_vel[client]*self.target_vel_robot[client])/np.linalg.norm(self.target_dir_robot[client])
+        velo_vec = self.base_lin_vel[client][0]
         speed = 5*velo_vec
 
         # Reward for being in good target direction
