@@ -4,7 +4,7 @@ import numpy as np
 import time as t
 import quad_multidirect_env as qe
 from torch.utils.data import Dataset, DataLoader
-from torch.distributions import Normal
+from torchrl.modules import TanhNormal
 from torch.utils.tensorboard import SummaryWriter
 
 class SAC_quad():
@@ -97,96 +97,9 @@ class SAC_quad():
             self.mlp.to(self.device)
             pass
         else:
-            class MLP(nn.Module):
-                def __init__(self):
-                    super(MLP,self).__init__()
-                    siz = (observation_space//2)*(buffer_length-1-2-4-8-16)
-                    # nn setup
-                    # policy network
-                    policy_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
-                    policy_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
-                    policy_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
-                    policy_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
-                    policy_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
-                    self.policy_pre_pros = nn.Sequential(
-                        policy_conv1,
-                        nn.LeakyReLU(.2),
-                        policy_conv2,
-                        nn.LeakyReLU(.2),
-                        policy_conv3,
-                        nn.LeakyReLU(.2),
-                        policy_conv4,
-                        nn.LeakyReLU(.2),
-                        policy_conv5,
-                        nn.LeakyReLU(.2),
-                        nn.Flatten()
-                    )
-                    policy_lin1 = nn.Linear(siz,500)
-                    torch.nn.init.xavier_normal_(policy_lin1.weight,gain=1)
-                    policy_lin2 = nn.Linear(500,100)
-                    torch.nn.init.xavier_normal_(policy_lin2.weight,gain=1)
-                    # quality network
-                    quality_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
-                    quality_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
-                    quality_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
-                    quality_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
-                    quality_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
-                    self.quality_pre_pros = nn.Sequential(
-                        quality_conv1,
-                        nn.LeakyReLU(.2),
-                        quality_conv2,
-                        nn.LeakyReLU(.2),
-                        quality_conv3,
-                        nn.LeakyReLU(.2),
-                        quality_conv4,
-                        nn.LeakyReLU(.2),
-                        quality_conv5,
-                        nn.LeakyReLU(.2),
-                        nn.Flatten()
-                    )
-                    
-                    quality_lin1 = nn.Linear(siz,500)
-                    torch.nn.init.xavier_normal_(quality_lin1.weight,gain=1)
-                    quality_lin2 = nn.Linear(500,100)
-                    torch.nn.init.xavier_normal_(quality_lin2.weight,gain=1)
-                    lin3 = nn.Linear(100,action_space)
-                    torch.nn.init.xavier_normal_(lin3.weight,gain=0.2)
-                    lin4 = nn.Linear(100,action_space)
-                    torch.nn.init.constant_(lin4.weight,1.)
-                    lin5 = nn.Linear(100,1)
-                    torch.nn.init.xavier_normal_(lin5.weight,gain=1)
-                    
-                    self.mean = nn.Sequential(
-                        self.policy_pre_pros,
-                        policy_lin1,
-                        nn.LeakyReLU(.2),
-                        policy_lin2,
-                        nn.LeakyReLU(.2),
-                        lin3,
-                    )
-                    self.var = nn.Sequential(
-                        self.policy_pre_pros,
-                        policy_lin1,
-                        nn.LeakyReLU(.2),
-                        policy_lin2,
-                        nn.LeakyReLU(.2),
-                        lin4,
-                    )
-                    self.critic = nn.Sequential(
-                        self.quality_pre_pros,
-                        quality_lin1,
-                        nn.LeakyReLU(.2),
-                        quality_lin2,
-                        nn.LeakyReLU(.2),
-                        lin5,
-                    )
-                def forward(self,input):
-                    return self.mean(input),self.var(input),self.critic(input)
-            self.mlp = MLP().to(self.device)
+            self.mlp = MLP(observation_space,action_space,buffer_length).to(self.device)
         print('MLP is ready!')
         print('params: ',sum(i.numel() for i in self.mlp.parameters()) )
-        
-
             
         # Optim setup
         self.mlp_optimizer = torch.optim.Adam(self.mlp.parameters(),lr = self.learning_rate)
@@ -205,13 +118,13 @@ class SAC_quad():
     
     def get_actor_critic_action_and_quality(self,obs,eval=True):
         logits, var, quality = self.mlp(obs)
-        probs = Normal(loc = logits, scale=self.zeta*nn.Sigmoid()(var))
+        probs = TanhNormal(loc = logits, scale=self.zeta*nn.Sigmoid()(var),max=np.pi/4,min=-np.pi/4)
         if eval is True:
             action = probs.sample()
-            return action, probs.log_prob(action).sum(dim=1), quality
+            return action, probs.log_prob(action), quality
         else:
             action = eval
-            return action, probs.log_prob(action).sum(dim=1), quality
+            return action, probs.log_prob(action), quality
     
         
     def get_data_from_env(self,length = None):
@@ -290,6 +203,91 @@ class SAC_quad():
         torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
         torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
         
+class MLP(nn.Module):
+    def __init__(self,observation_space,action_space,buffer_length):
+        super(MLP,self).__init__()
+        siz = (observation_space//2)*(buffer_length-1-2-4-8-16)
+        # nn setup
+        # policy network
+        policy_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
+        policy_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
+        policy_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
+        policy_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
+        policy_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
+        self.policy_pre_pros = nn.Sequential(
+            policy_conv1,
+            nn.LeakyReLU(.2),
+            policy_conv2,
+            nn.LeakyReLU(.2),
+            policy_conv3,
+            nn.LeakyReLU(.2),
+            policy_conv4,
+            nn.LeakyReLU(.2),
+            policy_conv5,
+            nn.LeakyReLU(.2),
+            nn.Flatten()
+        )
+        policy_lin1 = nn.Linear(siz,500)
+        torch.nn.init.xavier_normal_(policy_lin1.weight,gain=1)
+        policy_lin2 = nn.Linear(500,100)
+        torch.nn.init.xavier_normal_(policy_lin2.weight,gain=1)
+        # quality network
+        quality_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
+        quality_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
+        quality_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
+        quality_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
+        quality_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
+        self.quality_pre_pros = nn.Sequential(
+            quality_conv1,
+            nn.LeakyReLU(.2),
+            quality_conv2,
+            nn.LeakyReLU(.2),
+            quality_conv3,
+            nn.LeakyReLU(.2),
+            quality_conv4,
+            nn.LeakyReLU(.2),
+            quality_conv5,
+            nn.LeakyReLU(.2),
+            nn.Flatten()
+        )
+        
+        quality_lin1 = nn.Linear(siz,500)
+        torch.nn.init.xavier_normal_(quality_lin1.weight,gain=1)
+        quality_lin2 = nn.Linear(500,100)
+        torch.nn.init.xavier_normal_(quality_lin2.weight,gain=1)
+        lin3 = nn.Linear(100,action_space)
+        torch.nn.init.xavier_normal_(lin3.weight,gain=0.2)
+        lin4 = nn.Linear(100,action_space)
+        torch.nn.init.constant_(lin4.weight,1.)
+        lin5 = nn.Linear(100,1)
+        torch.nn.init.xavier_normal_(lin5.weight,gain=1)
+        
+        self.mean = nn.Sequential(
+            self.policy_pre_pros,
+            policy_lin1,
+            nn.LeakyReLU(.2),
+            policy_lin2,
+            nn.LeakyReLU(.2),
+            lin3,
+        )
+        self.var = nn.Sequential(
+            self.policy_pre_pros,
+            policy_lin1,
+            nn.LeakyReLU(.2),
+            policy_lin2,
+            nn.LeakyReLU(.2),
+            lin4,
+        )
+        self.critic = nn.Sequential(
+            self.quality_pre_pros,
+            quality_lin1,
+            nn.LeakyReLU(.2),
+            quality_lin2,
+            nn.LeakyReLU(.2),
+            lin5,
+        )
+    def forward(self,input):
+        return self.mean(input),self.var(input),self.critic(input)
 
 class custom_dataset(Dataset):
     
@@ -344,16 +342,16 @@ class custom_dataset(Dataset):
         return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1], self.local_return[idx]
 
 # # # TEST CODE # # #
-# trainer = SAC_quad(
-#                 num_robot = 9,
-#                 learning_rate = 1e-4,
-#                 data_size = 20,
-#                 batch_size = 10,
-#                 epochs=100,
-#                 thresh=1,
-#                 log_data = False,
-#                 save_model = False,
-#                 render_mode= None,
-#                 run=1,
-#                 )
-# trainer.train()
+trainer = SAC_quad(
+                num_robot = 9,
+                learning_rate = 1e-4,
+                data_size = 20,
+                batch_size = 10,
+                epochs=100,
+                thresh=1,
+                log_data = False,
+                save_model = False,
+                render_mode= None,
+                run=1,
+                )
+trainer.train()
