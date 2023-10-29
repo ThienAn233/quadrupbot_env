@@ -35,7 +35,7 @@ class SAC_quad():
         train_              = True,
         debug               = False,
         run                 = None,
-        temp                = 1,
+        temp                = 1.05,
         ):
         
         
@@ -65,7 +65,7 @@ class SAC_quad():
         self.debug              = debug 
         self.run                = run
         self.temp               = temp
-        
+        self.static_temp        = 1
         # Setup random seed
         torch.manual_seed(self.seed)
         np.random.seed(self.seed)
@@ -250,7 +250,7 @@ class SAC_quad():
         best_reward = 0
         for epoch in range(self.epochs):
             mlp = self.mlp.eval()
-            self.temp *=1.1
+            self.static_temp *= self.temp
             # Sample data from the environment
             with torch.no_grad():
                 data = self.get_data_from_env()
