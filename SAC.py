@@ -26,7 +26,6 @@ class SAC_quad():
         batch_size          = 5000,
         reward_index        = np.array([[1, 1, 1, 1, 1, 1]]),
         seed                = 1107,
-        mlp                 = None,
         device              = None,
         norm                = True,
         terrain_height      = [0, 0.05],
@@ -55,7 +54,6 @@ class SAC_quad():
         self.batch_size         = batch_size
         self.reward_index       = reward_index
         self.seed               = seed
-        self.mlp                = mlp
         self.device             = device
         self.norm               = norm
         self.terrain_height     = terrain_height
@@ -93,23 +91,26 @@ class SAC_quad():
         print(f'observation sapce of    {num_robot} robot is: {self.observation_space}')
         
         # Setup MLP
-        if self.mlp:
-            self.mlp.to(self.device)
-            pass
-        else:
-            self.mlp = MLP(observation_space,action_space,buffer_length).to(self.device)
+        self.actor = ACTOR(observation_space,action_space,buffer_length).to(self.device)
+        self.critic = CRITIC(observation_space,action_space,buffer_length).to(self.device)
         print('MLP is ready!')
-        print('params: ',sum(i.numel() for i in self.mlp.parameters()) )
-            
+        print('actor params: ',sum(i.numel() for i in self.actor.parameters()) )
+        print('critic params: ',sum(i.numel() for i in self.critic.parameters()) )
+        
         # Optim setup
-        self.mlp_optimizer = torch.optim.Adam(self.mlp.parameters(),lr = self.learning_rate)
+        self.actor_optimizer = torch.optim.Adam(self.actor.parameters(),lr = self.learning_rate)
+        self.critic_optimizer = torch.optim.Adam(self.critic.parameters(),lr = self.learning_rate)
         if load_model:
-            self.mlp.load_state_dict(torch.load(self.model_path,map_location=self.device))
-            self.mlp_optimizer.load_state_dict(torch.load(self.optim_path,map_location=self.device))
+            self.actor.load_state_dict(torch.load(self.model_path+"_actor",map_location=self.device))
+            self.actor_optimizer.load_state_dict(torch.load(self.optim_path+"_actor",map_location=self.device))
+            self.critic.load_state_dict(torch.load(self.model_path+"_critic",map_location=self.device))
+            self.critic_optimizer.load_state_dict(torch.load(self.optim_path+"_critic",map_location=self.device))
         else:
             pass
-        self.mlp_optimizer.param_groups[0]['lr'] = self.learning_rate
-        print('learning rate:',self.mlp_optimizer.param_groups[0]['lr'])
+        self.actor_optimizer.param_groups[0]['lr'] = self.learning_rate
+        print('learning rate:',self.actor_optimizer.param_groups[0]['lr'])
+        self.critic_optimizer.param_groups[0]['lr'] = self.learning_rate
+        print('learning rate:',self.critic_optimizer.param_groups[0]['lr'])
         
         # Tensor board
         if self.log_data:
@@ -117,15 +118,15 @@ class SAC_quad():
     
     
     def get_actor_critic_action_and_quality(self,obs,eval=None,resample=False):
-        logits, var = self.mlp.act(obs)
+        logits, var = self.actor(obs)
         probs = TanhNormal(loc = np.pi/4*logits, scale=self.zeta*var,max=np.pi/4,min=-np.pi/4)
         if eval is not None:
             action = eval
-            quality = self.mlp.est(obs,action)
+            quality = self.critic(obs,action)
             return probs.log_prob(action), quality
         elif resample:
             action  = probs.sample()
-            quality = self.mlp.est(obs,action)
+            quality = self.critic(obs,action)
             return probs.log_prob(action), quality
         else:
             action  = probs.sample()
@@ -166,37 +167,46 @@ class SAC_quad():
             self.static_temp *= self.temp
             # Sample data from the environment
             with torch.no_grad():
-                self.mlp = self.mlp.eval()
+                self.actor = self.actor.eval()
+                self.critic= self.critic.eval()
                 data = self.get_data_from_env()
             dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma)
             dataloader = DataLoader(dataset,batch_size=self.batch_size,shuffle=True)
             
             for iteration, data in enumerate(dataloader):
-                self.mlp = self.mlp.train()
+                self.actor = self.actor.train()
+                self.critic= self.critic.train()
                 obs, action, reward, next_obs, info = data
                 obs, action, reward, next_obs, info = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device), info.to(self.device)
                 logprob, quality                    = self.get_actor_critic_action_and_quality(obs,eval=action)
                 with torch.no_grad():
-                    self.mlp = self.mlp.eval()
+                    self.actor = self.actor.eval()
+                    self.critic= self.critic.eval()
                     next_logprob, next_quality      = self.get_actor_critic_action_and_quality(next_obs,resample=True)
                 #save model
                 if self.save_model:
                     if (quality.mean().item()>best_reward and quality.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
                         best_reward = quality.mean().item()
-                        torch.save(self.mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
-                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
+                        torch.save(self.actor.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+"actor")
+                        torch.save(self.actor_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim_actor')
+                        torch.save(self.critic.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+"critic")
+                        torch.save(self.critic_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim_critic')
                         print('saved at: '+str(round(quality.mean().item(),2)))
                 # Train models
-                self.mlp = self.mlp.train()
-                self.mlp_optimizer.zero_grad()
+                self.actor = self.actor.train()
+                self.critic= self.critic.train()
+                # Train critic
+                self.critic_optimizer.zero_grad()
                 targetQ     = reward + self.gamma*(1-info)*(next_quality-self.static_temp*logprob)
                 TD_residual = targetQ.detach() - quality
                 critic_loss = ((TD_residual)**2).mean()
+                critic_loss.backward()
+                self.critic_optimizer.step()
+                self.actor_optimizer.zero_grad()
                 new_logprob, new_quality = self.get_actor_critic_action_and_quality(obs,resample=True)
-                actor_loss  = (self.static_temp*new_logprob - new_quality.detach()).mean()
-                loss        = critic_loss + actor_loss
-                loss.backward()
-                self.mlp_optimizer.step()
+                actor_loss  = (self.static_temp*new_logprob - new_quality).mean()
+                actor_loss.backward()
+                self.actor_optimizer.step()
                 # logging info
                 if self.log_data:
                     self.writer.add_scalar('Eval/minibatchreward',reward.mean().item(),epoch*(len(dataloader))+iteration)
@@ -206,12 +216,14 @@ class SAC_quad():
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().item(),epoch*(len(dataloader))+iteration)
                 print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()} estqua: {quality.mean().detach().item()}')
-        torch.save(self.mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
-        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
+        torch.save(self.actor.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+"actor")
+        torch.save(self.actor_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim_actor')
+        torch.save(self.mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+"critic")
+        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim_critic')
         
-class MLP(nn.Module):
+class ACTOR(nn.Module):
     def __init__(self,observation_space,action_space,buffer_length):
-        super(MLP,self).__init__()
+        super(ACTOR,self).__init__()
         # actor_model
         self.lin_act1= nn.Linear(observation_space*buffer_length,500)
         self.lin_act2= nn.Linear(500,100)
@@ -223,7 +235,7 @@ class MLP(nn.Module):
         nn.init.orthogonal_(self.lin_act3.weight)
         nn.init.orthogonal_(self.lin_act4.weight)
         nn.init.orthogonal_(self.lin_act5.weight)
-        self.actor   = nn.Sequential(
+        self.actor_body   = nn.Sequential(
             nn.Flatten(),
             self.lin_act1,
             nn.Tanh(),
@@ -232,6 +244,15 @@ class MLP(nn.Module):
             self.lin_act3,
             nn.Tanh(),
         )
+    def forward(self,obs):
+        latent = self.actor_body(obs)
+        mean    = nn.Tanh()(self.lin_act4(latent))
+        var     = nn.Sigmoid()(self.lin_act5(latent))
+        return mean, var
+        
+class CRITIC(nn.Module):
+    def __init__(self,observation_space,action_space,buffer_length):
+        super(CRITIC,self).__init__()
         # critic_model (Q model)
         self.lin_cri1 = nn.Linear(observation_space*buffer_length,500)
         self.lin_cri2 = nn.Linear(action_space,500)   
@@ -243,7 +264,7 @@ class MLP(nn.Module):
         nn.init.orthogonal_(self.lin_cri3.weight)
         nn.init.orthogonal_(self.lin_cri4.weight)
         nn.init.orthogonal_(self.lin_cri5.weight)
-        self.critic  = nn.Sequential(
+        self.critic_body  = nn.Sequential(
             nn.Tanh(),
             self.lin_cri3,
             nn.Tanh(),
@@ -251,17 +272,10 @@ class MLP(nn.Module):
             nn.Tanh(),
             self.lin_cri5,
         )
-    def forward(self):
-        return 
-    def act(self,obs):
-        latent = self.actor(obs)
-        mean    = nn.Tanh()(self.lin_act4(latent))
-        var     = nn.Sigmoid()(self.lin_act5(latent))
-        return mean, var
-    def est(self,obs,act):
+    def forward(self,obs,act):
         lat1 = nn.Tanh()(self.lin_cri1(nn.Flatten()(obs)))
         lat2 = nn.Tanh()(self.lin_cri2(act))
-        estimate = self.critic(lat1+lat2)
+        estimate = self.critic_body(lat1+lat2)
         return estimate
         
 class custom_dataset(Dataset):
@@ -288,16 +302,16 @@ class custom_dataset(Dataset):
         return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1], self.local_info[idx]
 
 # # # TEST CODE # # #
-# trainer = SAC_quad(
-#                 num_robot = 9,
-#                 learning_rate = 1e-4,
-#                 data_size = 20,
-#                 batch_size = 10,
-#                 epochs=100,
-#                 thresh=1,
-#                 log_data = False,
-#                 save_model = False,
-#                 render_mode= None,
-#                 run=1,
-#                 )
-# trainer.train()
+trainer = SAC_quad(
+                num_robot = 9,
+                learning_rate = 1e-4,
+                data_size = 20,
+                batch_size = 10,
+                epochs=100,
+                thresh=1,
+                log_data = False,
+                save_model = False,
+                render_mode= None,
+                run=1,
+                )
+trainer.train()
