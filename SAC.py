@@ -118,7 +118,7 @@ class SAC_quad():
     
     def get_actor_critic_action_and_quality(self,obs,eval=None,resample=False):
         logits, var = self.mlp.act(obs)
-        probs = TanhNormal(loc = logits, scale=self.zeta*var,max=np.pi/4,min=-np.pi/4)
+        probs = TanhNormal(loc = np.pi/4*logits, scale=self.zeta*var,max=np.pi/4,min=-np.pi/4)
         if eval is not None:
             action = eval
             quality = self.mlp.est(obs,action)
