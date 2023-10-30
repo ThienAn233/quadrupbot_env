@@ -193,7 +193,7 @@ class SAC_quad():
                 TD_residual = targetQ.detach() - quality
                 critic_loss = ((TD_residual)**2).mean()
                 new_logprob, new_quality = self.get_actor_critic_action_and_quality(obs,resample=True)
-                actor_loss  = (self.static_temp*new_logprob - new_quality).mean()
+                actor_loss  = (self.static_temp*new_logprob - new_quality.detach()).mean()
                 loss        = critic_loss + actor_loss
                 loss.backward()
                 self.mlp_optimizer.step()
