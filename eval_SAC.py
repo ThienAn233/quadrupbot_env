@@ -3,7 +3,7 @@ import quad_multidirect_env as qa
 
 trainer = SAC.SAC_quad(
     envi            = qa,
-    load_model      = '2023-10-29-22-08-50_best_642.94',
+    load_model      = '2023-10-29-16-41-24_best_64.19',
     num_robot       = 1,
     learning_rate   = 0,
     data_size       = 500,

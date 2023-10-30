@@ -35,7 +35,7 @@ class SAC_quad():
         train_              = True,
         debug               = False,
         run                 = None,
-        temp                = 1.05,
+        temp                = 0.99,
         ):
         
         
@@ -116,15 +116,20 @@ class SAC_quad():
             self.writer = SummaryWriter(PATH + '//runs//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
     
     
-    def get_actor_critic_action_and_quality(self,obs,eval=True):
-        logits, var, quality = self.mlp(obs)
-        probs = TanhNormal(loc = logits, scale=self.zeta*nn.Sigmoid()(var),max=np.pi/4,min=-np.pi/4)
-        if eval is True:
-            action = probs.sample()
-            return action, probs.log_prob(action), quality
-        else:
+    def get_actor_critic_action_and_quality(self,obs,eval=None,resample=False):
+        logits, var = self.mlp.act(obs)
+        probs = TanhNormal(loc = logits, scale=self.zeta*var,max=np.pi/4,min=-np.pi/4)
+        if eval is not None:
             action = eval
-            return action, probs.log_prob(action), quality
+            quality = self.mlp.est(obs,action)
+            return probs.log_prob(action), quality
+        elif resample:
+            action  = probs.sample()
+            quality = self.mlp.est(obs,action)
+            return probs.log_prob(action), quality
+        else:
+            action  = probs.sample()
+            return action
     
         
     def get_data_from_env(self,length = None):
@@ -135,16 +140,12 @@ class SAC_quad():
         local_observation   = []
         local_action        = []
         local_reward        = []
-        local_timestep      = []
+        local_info          = []
         observation         = self.env.get_obs()[0]
-        local_timestep      = []
         for i in range(length) :
-            
             # Act and get observation 
-            timestep                    = np.array(self.env.time_steps_in_current_episode)
-            local_timestep             +=[torch.Tensor(timestep.copy())]
-            action, logprob, _          = self.get_actor_critic_action_and_quality(torch.Tensor(observation).to(self.device))
-            action, logprob             = action.cpu(), logprob.cpu()
+            action                      = self.get_actor_critic_action_and_quality(torch.Tensor(observation).to(self.device))
+            action                      = action.cpu()
             local_observation          += [torch.Tensor(observation)]
             local_action               += [torch.Tensor(action)]
             if self.run:
@@ -152,194 +153,139 @@ class SAC_quad():
             observation, reward, info   = self.env.sim(np.array(action),real_time=self.real_time,train=self.train_)
             if self.print_rew:
                 print(reward)
-            reward          = np.sum(reward*self.reward_index,axis=-1) - (1/self.temp)*logprob.numpy()
-            
+            reward          = np.sum(reward*self.reward_index,axis=-1)
             # Save var
             local_reward   += [torch.Tensor(reward)]
-        return local_observation, local_action, local_reward, local_timestep
+            local_info     += [torch.Tensor(info)]
+        return local_observation, local_action, local_reward, local_info
     
     
     def train(self):
         best_reward = 0
         for epoch in range(self.epochs):
-            mlp = self.mlp.eval()
             self.static_temp *= self.temp
             # Sample data from the environment
             with torch.no_grad():
+                self.mlp = self.mlp.eval()
                 data = self.get_data_from_env()
-            dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma,verbose=False)
+            dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma)
             dataloader = DataLoader(dataset,batch_size=self.batch_size,shuffle=True)
             
             for iteration, data in enumerate(dataloader):
-                mlp = mlp.train()
-                obs, action, reward, next_obs, realreturn   = data
-                obs, action, reward, next_obs, realreturn   = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device), realreturn.to(self.device)
-                _, logprob, quality                         = self.get_actor_critic_action_and_quality(obs,eval=action)
-                next_action, next_logprob, next_quality = self.get_actor_critic_action_and_quality(next_obs)
+                self.mlp = self.mlp.train()
+                obs, action, reward, next_obs, info = data
+                obs, action, reward, next_obs, info = obs.to(self.device), action.to(self.device), reward.to(self.device), next_obs.to(self.device), info.to(self.device)
+                logprob, quality                    = self.get_actor_critic_action_and_quality(obs,eval=action)
+                with torch.no_grad():
+                    self.mlp = self.mlp.eval()
+                    next_logprob, next_quality      = self.get_actor_critic_action_and_quality(next_obs,resample=True)
                 #save model
                 if self.save_model:
-                    if (realreturn.mean().item()>best_reward and realreturn.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
-                        best_reward = realreturn.mean().item()
-                        torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(realreturn.mean().item(),2)))
-                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(realreturn.mean().item(),2))+'_optim')
-                        print('saved at: '+str(round(realreturn.mean().item(),2)))
+                    if (quality.mean().item()>best_reward and quality.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
+                        best_reward = quality.mean().item()
+                        torch.save(self.mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2)))
+                        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim')
+                        print('saved at: '+str(round(quality.mean().item(),2)))
                 # Train models
+                self.mlp = self.mlp.train()
                 self.mlp_optimizer.zero_grad()
-                TD_residual = realreturn - quality
-                critic_loss = .5*((TD_residual)**2).mean()
-                actor_loss  = nn.KLDivLoss(reduction="batchmean",log_target=True)((next_logprob),nn.functional.log_softmax(quality,dim=1).detach().squeeze())
+                targetQ     = reward + self.gamma*(1-info)*(next_quality-self.static_temp*logprob)
+                TD_residual = targetQ.detach() - quality
+                critic_loss = ((TD_residual)**2).mean()
+                new_logprob, new_quality = self.get_actor_critic_action_and_quality(obs,resample=True)
+                actor_loss  = (self.static_temp*new_logprob - new_quality).mean()
                 loss        = critic_loss + actor_loss
                 loss.backward()
                 self.mlp_optimizer.step()
                 # logging info
                 if self.log_data:
                     self.writer.add_scalar('Eval/minibatchreward',reward.mean().item(),epoch*(len(dataloader))+iteration)
-                    self.writer.add_scalar('Eval/minibatchreturn',realreturn.mean().item(),epoch*(len(dataloader))+iteration)
+                    self.writer.add_scalar('Eval/minibatchreturn',quality.mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Eval/estreturn',quality.detach().mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/entropy',-logprob.mean().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().item(),epoch*(len(dataloader))+iteration)
-                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(realreturn.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()} estqua: {quality.mean().detach().item()}')
-        torch.save(mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
+                print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()} estqua: {quality.mean().detach().item()}')
+        torch.save(self.mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime()))
         torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim')
         
 class MLP(nn.Module):
     def __init__(self,observation_space,action_space,buffer_length):
         super(MLP,self).__init__()
-        siz = (observation_space//2)*(buffer_length-1-2-4-8-16)
-        # nn setup
-        # policy network
-        policy_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
-        policy_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
-        policy_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
-        policy_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
-        policy_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
-        self.policy_pre_pros = nn.Sequential(
-            policy_conv1,
-            nn.LeakyReLU(.2),
-            policy_conv2,
-            nn.LeakyReLU(.2),
-            policy_conv3,
-            nn.LeakyReLU(.2),
-            policy_conv4,
-            nn.LeakyReLU(.2),
-            policy_conv5,
-            nn.LeakyReLU(.2),
-            nn.Flatten()
+        # actor_model
+        self.lin_act1= nn.Linear(observation_space*buffer_length,500)
+        self.lin_act2= nn.Linear(500,100)
+        self.lin_act3= nn.Linear(100,50)
+        self.lin_act4= nn.Linear(50,action_space)
+        self.lin_act5= nn.Linear(50,action_space)
+        nn.init.orthogonal_(self.lin_act1.weight)
+        nn.init.orthogonal_(self.lin_act2.weight)
+        nn.init.orthogonal_(self.lin_act3.weight)
+        nn.init.orthogonal_(self.lin_act4.weight)
+        nn.init.orthogonal_(self.lin_act5.weight)
+        self.actor   = nn.Sequential(
+            nn.Flatten(),
+            self.lin_act1,
+            nn.Tanh(),
+            self.lin_act2,
+            nn.Tanh(),
+            self.lin_act3,
+            nn.Tanh(),
         )
-        policy_lin1 = nn.Linear(siz,500)
-        torch.nn.init.xavier_normal_(policy_lin1.weight,gain=1)
-        policy_lin2 = nn.Linear(500,100)
-        torch.nn.init.xavier_normal_(policy_lin2.weight,gain=1)
-        # quality network
-        quality_conv1= nn.Conv1d(observation_space,observation_space*8,2,dilation=1)
-        quality_conv2= nn.Conv1d(observation_space*8,observation_space*4,2,dilation=2)
-        quality_conv3= nn.Conv1d(observation_space*4,observation_space*2,2,dilation=4)
-        quality_conv4= nn.Conv1d(observation_space*2,observation_space,2,dilation=8)
-        quality_conv5= nn.Conv1d(observation_space,observation_space//2,2,dilation=16)
-        self.quality_pre_pros = nn.Sequential(
-            quality_conv1,
-            nn.LeakyReLU(.2),
-            quality_conv2,
-            nn.LeakyReLU(.2),
-            quality_conv3,
-            nn.LeakyReLU(.2),
-            quality_conv4,
-            nn.LeakyReLU(.2),
-            quality_conv5,
-            nn.LeakyReLU(.2),
-            nn.Flatten()
+        # critic_model (Q model)
+        self.lin_cri1 = nn.Linear(observation_space*buffer_length,500)
+        self.lin_cri2 = nn.Linear(action_space,500)   
+        self.lin_cri3 = nn.Linear(500,100)
+        self.lin_cri4 = nn.Linear(100,50)
+        self.lin_cri5 = nn.Linear(50,1)
+        nn.init.orthogonal_(self.lin_cri1.weight)
+        nn.init.orthogonal_(self.lin_cri2.weight)
+        nn.init.orthogonal_(self.lin_cri3.weight)
+        nn.init.orthogonal_(self.lin_cri4.weight)
+        nn.init.orthogonal_(self.lin_cri5.weight)
+        self.critic  = nn.Sequential(
+            nn.Tanh(),
+            self.lin_cri3,
+            nn.Tanh(),
+            self.lin_cri4,
+            nn.Tanh(),
+            self.lin_cri5,
         )
+    def forward(self):
+        return 
+    def act(self,obs):
+        latent = self.actor(obs)
+        mean    = nn.Tanh()(self.lin_act4(latent))
+        var     = nn.Sigmoid()(self.lin_act5(latent))
+        return mean, var
+    def est(self,obs,act):
+        lat1 = nn.Tanh()(self.lin_cri1(nn.Flatten()(obs)))
+        lat2 = nn.Tanh()(self.lin_cri2(act))
+        estimate = self.critic(lat1+lat2)
+        return estimate
         
-        quality_lin1 = nn.Linear(siz,500)
-        torch.nn.init.xavier_normal_(quality_lin1.weight,gain=1)
-        quality_lin2 = nn.Linear(500,100)
-        torch.nn.init.xavier_normal_(quality_lin2.weight,gain=1)
-        lin3 = nn.Linear(100,action_space)
-        torch.nn.init.xavier_normal_(lin3.weight,gain=0.2)
-        lin4 = nn.Linear(100,action_space)
-        torch.nn.init.constant_(lin4.weight,1.)
-        lin5 = nn.Linear(100,1)
-        torch.nn.init.xavier_normal_(lin5.weight,gain=1)
-        
-        self.mean = nn.Sequential(
-            self.policy_pre_pros,
-            policy_lin1,
-            nn.LeakyReLU(.2),
-            policy_lin2,
-            nn.LeakyReLU(.2),
-            lin3,
-        )
-        self.var = nn.Sequential(
-            self.policy_pre_pros,
-            policy_lin1,
-            nn.LeakyReLU(.2),
-            policy_lin2,
-            nn.LeakyReLU(.2),
-            lin4,
-        )
-        self.critic = nn.Sequential(
-            self.quality_pre_pros,
-            quality_lin1,
-            nn.LeakyReLU(.2),
-            quality_lin2,
-            nn.LeakyReLU(.2),
-            lin5,
-        )
-    def forward(self,input):
-        return self.mean(input),self.var(input),self.critic(input)
-
 class custom_dataset(Dataset):
     
     def __init__(self,data,data_size,num_robot,gamma,verbose = False):
         self.data_size  = data_size
         self.num_robot  = num_robot
         self.gamma      = gamma
-        self.obs, self.action, self.reward, self.timestep = data       
-        self.local_return = [0 for i in range(data_size)]
-        self.calculate_return()
-        self.local_return = torch.stack(self.local_return,dim=1).reshape((num_robot*data_size,*self.local_return[0].shape[1:])).view(-1,1)
-        self.local_observation = torch.hstack(self.obs).reshape((num_robot*data_size,*self.obs[0].shape[1:]))
-        self.local_action = torch.hstack(self.action).reshape((num_robot*data_size,*self.action[0].shape[1:]))
-        self.local_reward = torch.stack(self.reward,dim=1).reshape((num_robot*data_size,*self.reward[0].shape[1:])).view(-1,1)
-        self.local_timestep = torch.stack(self.timestep,dim=1).reshape((num_robot*data_size,*self.timestep[0].shape[1:])).view(-1,1)
-        self.check_time()
+        self.obs, self.action, self.reward, self.info = data       
+        self.local_observation  = torch.hstack(self.obs).reshape((num_robot*data_size,*self.obs[0].shape[1:]))
+        self.local_action       = torch.hstack(self.action).reshape((num_robot*data_size,*self.action[0].shape[1:]))
+        self.local_reward       = torch.stack(self.reward,dim=1).reshape((num_robot*data_size,*self.reward[0].shape[1:])).view(-1,1)
+        self.local_info         = torch.stack(self.info,dim=1).reshape((num_robot*data_size,*self.info[0].shape[1:])).view(-1,1)
         if verbose:
-            print(self.local_return.shape)
             print(self.local_observation.shape)
             print(self.local_action.shape)
             print(self.local_reward.shape)
-            print(self.local_timestep.shape)
-
-    def isnt_end(self, i):
-        ### THE FIRST EPS WILL BE TIMESTEP 1, THE FINAL EP WILL BE TIMESTEP 0
-        return self.timestep[i] != 0
-    
-    def calculate_return(self):
-        for i in range(self.data_size-1,-1,-1):
-            if i == self.data_size-1 :
-                self.local_return[i] = self.reward[i]
-            else:
-                self.local_return[i] = self.reward[i] + self.isnt_end(i)*self.gamma*self.local_return[i+1]
-        return self.local_return
-    
-    def check_time(self):
-        self.index = []
-        for index in range(len(self.local_timestep)):
-            if index == len(self.local_timestep)-1:
-                continue
-            elif self.local_timestep[index][0] < self.local_timestep[index+1][0] :
-                self.index += [index]
-            else:
-                continue
-        return self.index
+            print(self.local_info.shape)
     
     def __len__(self):
-        return len(self.index)
+        return self.data_size-1
     
-    def __getitem__(self, index):
-        idx = self.index[index]
-        return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1], self.local_return[idx]
+    def __getitem__(self, idx):
+        return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1], self.local_info[idx]
 
 # # # TEST CODE # # #
 # trainer = SAC_quad(
