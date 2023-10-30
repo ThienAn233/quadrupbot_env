@@ -302,16 +302,16 @@ class custom_dataset(Dataset):
         return self.local_observation[idx], self.local_action[idx], self.local_reward[idx], self.local_observation[idx+1], self.local_info[idx]
 
 # # # TEST CODE # # #
-trainer = SAC_quad(
-                num_robot = 9,
-                learning_rate = 1e-4,
-                data_size = 20,
-                batch_size = 10,
-                epochs=100,
-                thresh=1,
-                log_data = False,
-                save_model = False,
-                render_mode= None,
-                run=1,
-                )
-trainer.train()
+# trainer = SAC_quad(
+#                 num_robot = 9,
+#                 learning_rate = 1e-4,
+#                 data_size = 20,
+#                 batch_size = 10,
+#                 epochs=100,
+#                 thresh=1,
+#                 log_data = False,
+#                 save_model = False,
+#                 render_mode= None,
+#                 run=1,
+#                 )
+# trainer.train()
