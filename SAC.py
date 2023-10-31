@@ -197,6 +197,7 @@ class SAC_quad():
                 self.critic= self.critic.train()
                 # Train critic
                 self.critic_optimizer.zero_grad()
+                self.actor_optimizer.zero_grad()
                 targetQ     = reward + self.gamma*(1-info)*(next_quality-self.static_temp*logprob)
                 TD_residual = targetQ.detach() - quality
                 critic_loss = ((TD_residual)**2).mean()
@@ -207,6 +208,7 @@ class SAC_quad():
                 actor_loss  = (self.static_temp*new_logprob - new_quality).mean()
                 actor_loss.backward()
                 self.actor_optimizer.step()
+                self.critic_optimizer.zero_grad()
                 # logging info
                 if self.log_data:
                     self.writer.add_scalar('Eval/minibatchreward',reward.mean().item(),epoch*(len(dataloader))+iteration)
