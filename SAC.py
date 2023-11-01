@@ -119,7 +119,7 @@ class SAC_quad():
     
     def get_actor_critic_action_and_quality(self,obs,eval=None,resample=False):
         logits, var = self.actor(obs)
-        probs = TanhNormal(loc = np.pi/4*logits, scale=self.zeta*var,max=np.pi/4,min=-np.pi/4)
+        probs = TanhNormal(loc = logits, scale=self.zeta*var,max=np.pi/4,min=-np.pi/4)
         if eval is not None:
             action = eval
             quality = self.critic(obs,action)
@@ -172,7 +172,8 @@ class SAC_quad():
                 data = self.get_data_from_env()
             dataset = custom_dataset(data,self.data_size,self.num_robot,self.gamma)
             dataloader = DataLoader(dataset,batch_size=self.batch_size,shuffle=True)
-            
+            eplen = self.data_size*self.num_robot/dataset.local_info.sum()
+            print(f'mean episode length: {eplen}')
             for iteration, data in enumerate(dataloader):
                 self.actor = self.actor.train()
                 self.critic= self.critic.train()
@@ -187,9 +188,9 @@ class SAC_quad():
                 if self.save_model:
                     if (quality.mean().item()>best_reward and quality.mean().item() > self.thresh) | ((epoch*(len(dataloader))+iteration) % 250 == 0):
                         best_reward = quality.mean().item()
-                        torch.save(self.actor.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+"actor")
+                        torch.save(self.actor.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+"_actor")
                         torch.save(self.actor_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim_actor')
-                        torch.save(self.critic.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+"critic")
+                        torch.save(self.critic.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+"_critic")
                         torch.save(self.critic_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_best_'+str(round(quality.mean().item(),2))+'_optim_critic')
                         print('saved at: '+str(round(quality.mean().item(),2)))
                 # Train models
@@ -218,14 +219,15 @@ class SAC_quad():
                     self.writer.add_scalar('Train/criticloss',critic_loss.detach().item(),epoch*(len(dataloader))+iteration)
                     self.writer.add_scalar('Train/actorloss',actor_loss.detach().item(),epoch*(len(dataloader))+iteration)
                 print(f'[{epoch}]:[{self.epochs}]|| iter [{epoch*(len(dataloader))+iteration}]: rew: {round(reward.mean().item(),2)} ret: {round(quality.mean().item(),2)} cri: {critic_loss.detach().item()} act: {actor_loss.detach().item()} entr: {-logprob.mean().detach().item()} estqua: {quality.mean().detach().item()}')
-        torch.save(self.actor.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+"actor")
+        torch.save(self.actor.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+"_actor")
         torch.save(self.actor_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim_actor')
-        torch.save(self.mlp.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+"critic")
-        torch.save(self.mlp_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim_critic')
+        torch.save(self.critic.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+"_critic")
+        torch.save(self.critic_optimizer.state_dict(), self.PATH+'models//SAC//'+t.strftime('%Y-%m-%d-%H-%M-%S', t.localtime())+'_optim_critic')
         
 class ACTOR(nn.Module):
     def __init__(self,observation_space,action_space,buffer_length):
         super(ACTOR,self).__init__()
+        self.activation = nn.LeakyReLU(0.2)
         # actor_model
         self.lin_act1= nn.Linear(observation_space*buffer_length,500)
         self.lin_act2= nn.Linear(500,100)
@@ -240,21 +242,22 @@ class ACTOR(nn.Module):
         self.actor_body   = nn.Sequential(
             nn.Flatten(),
             self.lin_act1,
-            nn.Tanh(),
+            self.activation,
             self.lin_act2,
-            nn.Tanh(),
+            self.activation,
             self.lin_act3,
-            nn.Tanh(),
+            self.activation,
         )
     def forward(self,obs):
-        latent = self.actor_body(obs)
-        mean    = nn.Tanh()(self.lin_act4(latent))
+        latent  = self.actor_body(obs)
+        mean    = self.lin_act4(latent)
         var     = nn.Sigmoid()(self.lin_act5(latent))
         return mean, var
         
 class CRITIC(nn.Module):
     def __init__(self,observation_space,action_space,buffer_length):
         super(CRITIC,self).__init__()
+        self.activation = nn.LeakyReLU(0.2)
         # critic_model (Q model)
         self.lin_cri1 = nn.Linear(observation_space*buffer_length,500)
         self.lin_cri2 = nn.Linear(action_space,500)   
@@ -267,16 +270,16 @@ class CRITIC(nn.Module):
         nn.init.orthogonal_(self.lin_cri4.weight)
         nn.init.orthogonal_(self.lin_cri5.weight)
         self.critic_body  = nn.Sequential(
-            nn.Tanh(),
+            self.activation,
             self.lin_cri3,
-            nn.Tanh(),
+            self.activation,
             self.lin_cri4,
-            nn.Tanh(),
+            self.activation,
             self.lin_cri5,
         )
     def forward(self,obs,act):
-        lat1 = nn.Tanh()(self.lin_cri1(nn.Flatten()(obs)))
-        lat2 = nn.Tanh()(self.lin_cri2(act))
+        lat1 = self.activation(self.lin_cri1(nn.Flatten()(obs)))
+        lat2 = self.activation(self.lin_cri2(act))
         estimate = self.critic_body(lat1+lat2)
         return estimate
         

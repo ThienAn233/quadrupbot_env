@@ -13,7 +13,7 @@ class Quadrup_env():
         render_mode     = None,
         debug           = False,
         robot_file      = 'quadrupbot_env//quadrup.urdf',
-        num_robot       = 9,
+        num_robot       = 1,
         terrainHeight   = [0., 0.05],
         seed            = 0,
     ):
