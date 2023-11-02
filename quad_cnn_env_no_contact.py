@@ -364,7 +364,7 @@ class Quadrup_env():
 
         # Reward for being in good y direction
         align_vec = np.sum(self.target_dir[robotId][0])/np.linalg.norm(self.target_dir[robotId])
-        align = 0.5*np.exp(-(align_vec-1)**2)
+        align = 5*np.exp(-(align_vec-1)**2)
         
         # Reward for being high
         high = 0 #-50*(-self.base_pos[robotId,-1]+.2) if self.base_pos[robotId,-1]<.2 else 0
@@ -373,10 +373,10 @@ class Quadrup_env():
         surv = 0
         
         # Reward for minimal force
-        force = (-1e-7)*((self.reaction_force[robotId,:]**2).sum())
+        force = (-1e-5)*((self.reaction_force[robotId,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-6)*((self.contact_force[robotId,:]**2).sum())
+        contact =(-1e-4)*((self.contact_force[robotId,:]**2).sum())
         
         return [speed, align, high, surv, force,  contact]
     
