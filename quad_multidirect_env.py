@@ -12,6 +12,7 @@ class Quadrup_env():
         render_mode     = None,
         debug           = False,
         robot_file      = 'quadrupbot_env//quadrup.urdf',
+        target_file     = 'quadrupbot_env//target.urdf',
         num_robot       = 1,
         terrainHeight   = [0., 0.05],
         seed            = 0,
@@ -26,10 +27,12 @@ class Quadrup_env():
                 self.clientId  += [p.connect(p.GUI)]
             else:
                 self.clientId  += [p.connect(p.DIRECT)]
+        self.render_mode        = render_mode
         self.max_length         = max_length
         self.num_step           = num_step
         self.debug              = debug
         self.robot_file         = robot_file
+        self.target_file        = target_file
         self.num_robot          = num_robot 
         self.initialVel         = [0, .2]
         self.initialMass        = [0, 1.]
@@ -47,6 +50,7 @@ class Quadrup_env():
         
         # Constant DO NOT TOUCH
         self.robotId= 0
+        self.targetId=1 
         self.mode   = p.POSITION_CONTROL
         self.seed   = seed
         self.sleep_time = 1./240.
@@ -77,6 +81,7 @@ class Quadrup_env():
             p.setAdditionalSearchPath(pybullet_data.getDataPath(), physicsClientId=client)
             p.setGravity(*self.g, physicsClientId=client)
             p.loadURDF(self.robot_file, basePosition=[0,0,self.initialHeight],baseOrientation=[0,0,0,1], physicsClientId=client)
+            p.loadURDF(self.target_file,basePosition=[0,0,self.initialHeight],baseOrientation=[0,0,0,1], physicsClientId=client)
         self.sample_terrain()
         self.number_of_joints = p.getNumJoints(self.robotId, physicsClientId = self.clientId[0])
         for jointIndex in range(0,self.number_of_joints):
@@ -136,11 +141,9 @@ class Quadrup_env():
         for jointId in self.jointId_list:
             p.resetJointState(bodyUniqueId=self.robotId,jointIndex=jointId,targetValue=0,targetVelocity=0,physicsClientId=client)
         # Sample target direction and velocity
-        new_direction   = np.random.normal(0,1,3)
-        new_velodir     = np.random.normal(0,1,3)
-        new_direction, new_velodir = new_direction/np.linalg.norm(new_direction), new_velodir/np.linalg.norm(new_velodir)
+        new_direction   = np.hstack([np.random.normal(0,5,2),np.array([self.initialHeight])])
+        p.resetBasePositionAndOrientation(self.targetId, new_direction, random_Ori, physicsClientId = client)
         self.target_dir_world[client] = new_direction
-        self.target_vel_world[client] = new_velodir
         return
     
     
@@ -148,9 +151,6 @@ class Quadrup_env():
         numHeightfieldRows = int(self.terrain_shape[0]/(self.terrainScale[0]))
         numHeightfieldColumns = int(self.terrain_shape[1]/(self.terrainScale[1]))
         for i in range(len(self.clientId)):
-            x = np.linspace(-np.pi/2,self.terrain_shape[0],numHeightfieldRows)
-            y = np.linspace(-np.pi/2,self.terrain_shape[1],numHeightfieldColumns)
-            xx, yy = np.meshgrid(x,y)
             zz = np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             heightfieldData = zz.flatten()
             terrainShape = p.createCollisionShape(shapeType = p.GEOM_HEIGHTFIELD, meshScale=self.terrainScale, heightfieldTextureScaling=(numHeightfieldRows-1)/2, heightfieldData=heightfieldData, numHeightfieldRows=numHeightfieldRows, numHeightfieldColumns=numHeightfieldColumns, physicsClientId=self.clientId[i])
@@ -206,12 +206,12 @@ class Quadrup_env():
         temp_obs_vaule = []
         base_pos, base_orientation =  p.getBasePositionAndOrientation(self.robotId,physicsClientId =client)
         # Calculate target direction
-        target_dir = self.target_dir_world[client] + base_pos
+        target_dir = self.target_dir_world[client] - base_pos
         target_dir = np.array(list(target_dir)+[0])
-        target_dir = target_dir/np.linalg.norm(target_dir)
+        target_norm = np.linalg.norm(target_dir)
         target_dir = utils.active_rotation(np.array(base_orientation),target_dir)[:3]
-        target_dir = np.array([target_dir[0],target_dir[1],0])
-        target_dir = target_dir/np.linalg.norm(target_dir)
+        target_dir = target_norm*np.array([target_dir[0],target_dir[1],0])
+        # target_dir = target_dir/np.linalg.norm(target_dir)
         self.target_dir_robot[client] = target_dir
         temp_obs_vaule += [*target_dir]
         # Calculate target velodirect
@@ -307,6 +307,7 @@ class Quadrup_env():
             self.act(filtered_action)
             for client in self.clientId:
                 p.stepSimulation( physicsClientId=client)
+                p.resetBasePositionAndOrientation(self.targetId,self.target_dir_world[client], [0,0,0,1], physicsClientId = client)
             if real_time:
                 t.sleep(self.sleep_time)
         if self.debug:
@@ -356,18 +357,21 @@ class Quadrup_env():
     def get_reward_value(self,client):
         # Reward for high speed in target velocity direction
         velo_vec = self.base_lin_vel[client][0]
-        speed = 5*velo_vec
+        speed = velo_vec
 
         # Reward for being in good target direction
-        align_vec = np.sum(self.target_dir_robot[client][0])/np.linalg.norm(self.target_dir_robot[client])
-        align = align_vec
+        align_vec = np.linalg.norm(self.target_dir_robot[client])
+        align = -align_vec
+        
+        # Reward for being high
+        high = -2*(-self.base_pos[client,-1]+.3) if self.base_pos[client,-1]<.3 else 0
         
         # Reward for termination
         ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
         high = -20 if ori < .5 else 0
         
         # Reward for surviving 
-        surv = 0.1
+        surv = 0.01
         
         # Reward for minimal force
         force = (-1e-7)*((self.reaction_force[client,:]**2).sum())
