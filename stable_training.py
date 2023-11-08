@@ -1,4 +1,4 @@
-import quad_cnn_env_no_contact as qa
+import quad_multidirect_env as qa
 from stable_baselines3 import SAC
 from gym_env_wrapper import CustomEnv
 import os
@@ -10,4 +10,4 @@ env = CustomEnv(qa)
 # Define and Train the agent
 model = SAC(policy="MlpPolicy",learning_rate=1e-4,env=env,verbose=1,tensorboard_log=log_path)
 model.learn(350000,tb_log_name="SAC_tryout")
-model.save('SAC_tryout')
+model.save('SAC_tryout_new')

@@ -361,7 +361,7 @@ class Quadrup_env():
 
         # Reward for being in good target direction
         align_vec = np.linalg.norm(self.target_dir_robot[client])
-        align = -align_vec
+        align = -align_vec/10
         
         # Reward for being high
         high = -2*(-self.base_pos[client,-1]+.3) if self.base_pos[client,-1]<.3 else 0
@@ -371,7 +371,7 @@ class Quadrup_env():
         high = -20 if ori < .5 else 0
         
         # Reward for surviving 
-        surv = 0.01
+        surv = 1
         
         # Reward for minimal force
         force = (-1e-7)*((self.reaction_force[client,:]**2).sum())

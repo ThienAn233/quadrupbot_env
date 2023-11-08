@@ -81,18 +81,20 @@ class CustomEnv(gym.Env):
 # check_env(env)
 # print('checked, no error!')
 # # # TRAIN CHECK # # #
-# import quad_multidirect_env as qa
-# from stable_baselines3 import SAC
-# # Instantiate the env
-# env = CustomEnv(qa,render_mode = 'human')
+import quad_multidirect_env as qa
+from stable_baselines3 import SAC
+# Instantiate the env
+env = CustomEnv(qa,render_mode = 'human')
 # # Define and Train the agent
 # model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
 # model.learn(5000)
 # model.save('SAC_tryout')
-# model = SAC.load('SAC_tryout_colab',device='cpu')
-# obs, info = env.reset()
-# while True:
-#     action, _states = model.predict(obs, deterministic=True)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     if terminated or truncated:
-#         obs, info = env.reset()
+import time as t
+model = SAC.load('SAC_tryout_new',device='cpu')
+obs, info = env.reset()
+while True:
+    t.sleep(0.05)
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, terminated, truncated, info = env.step(action)
+    if terminated or truncated:
+        obs, info = env.reset()
