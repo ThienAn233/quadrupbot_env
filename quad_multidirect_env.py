@@ -60,7 +60,7 @@ class Quadrup_env():
         self.T      = self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
-        self.terrain_shape  = [20, 20]
+        self.terrain_shape  = [30, 30]
         self.feet_list = [2,5,8,11]
         self.control_body       = np.zeros((self.num_robot,3))
         self.control_face       = np.zeros((self.num_robot,3))
@@ -142,6 +142,7 @@ class Quadrup_env():
             p.resetJointState(bodyUniqueId=self.robotId,jointIndex=jointId,targetValue=0,targetVelocity=0,physicsClientId=client)
         # Sample target direction and velocity
         new_direction   = np.hstack([np.random.normal(0,5,2),np.array([self.initialHeight])])
+        new_direction   = 10*new_direction/np.linalg.norm(new_direction) 
         p.resetBasePositionAndOrientation(self.targetId, new_direction, random_Ori, physicsClientId = client)
         self.target_dir_world[client] = new_direction
         return
@@ -211,7 +212,7 @@ class Quadrup_env():
         target_norm = np.linalg.norm(target_dir)
         target_dir = utils.active_rotation(np.array(base_orientation),target_dir)[:3]
         target_dir = target_norm*np.array([target_dir[0],target_dir[1],0])
-        # target_dir = target_dir/np.linalg.norm(target_dir)
+        target_dir = target_dir/np.linalg.norm(target_dir)
         self.target_dir_robot[client] = target_dir
         temp_obs_vaule += [*target_dir]
         # Calculate target velodirect
