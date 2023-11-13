@@ -14,7 +14,7 @@ class Quadrup_env():
         robot_file      = 'quadrupbot_env//quadrup.urdf',
         target_file     = 'quadrupbot_env//target.urdf',
         num_robot       = 1,
-        terrainHeight   = [0., 0.05],
+        terrainHeight   = [0., 0.],
         seed            = 0,
         buffer_length   = 60,
     ):
@@ -141,8 +141,8 @@ class Quadrup_env():
         for jointId in self.jointId_list:
             p.resetJointState(bodyUniqueId=self.robotId,jointIndex=jointId,targetValue=0,targetVelocity=0,physicsClientId=client)
         # Sample target direction and velocity
-        new_direction   = np.hstack([np.random.normal(0,5,2),np.array([self.initialHeight])])
-        new_direction   = 10*new_direction/np.linalg.norm(new_direction) 
+        new_direction   = np.random.normal(0,5,2)
+        new_direction   = np.hstack([10*new_direction/np.linalg.norm(new_direction),np.array([self.initialHeight])])
         p.resetBasePositionAndOrientation(self.targetId, new_direction, random_Ori, physicsClientId = client)
         self.target_dir_world[client] = new_direction
         return
@@ -212,9 +212,9 @@ class Quadrup_env():
         target_norm = np.linalg.norm(target_dir)
         target_dir = utils.active_rotation(np.array(base_orientation),target_dir)[:3]
         target_dir = target_norm*np.array([target_dir[0],target_dir[1],0])
-        target_dir = target_dir/np.linalg.norm(target_dir)
+        target_dir = target_dir
         self.target_dir_robot[client] = target_dir
-        temp_obs_vaule += [*target_dir]
+        temp_obs_vaule += [*(target_dir/np.linalg.norm(target_dir))]
         # Calculate target velodirect
         # target_vel = self.target_vel_world[client] + base_pos
         # target_vel = np.array(list(target_vel)+[0])
@@ -362,7 +362,7 @@ class Quadrup_env():
 
         # Reward for being in good target direction
         align_vec = np.linalg.norm(self.target_dir_robot[client])
-        align = -align_vec
+        align = 10*(10-align_vec)
         
         # Reward for being high
         high = -2*(-self.base_pos[client,-1]+.3) if self.base_pos[client,-1]<.3 else 0

@@ -24,7 +24,7 @@ class CustomEnv(gym.Env):
 
     def step(self, action, *args, **kwargs):
         action *= np.pi/4
-        action = action.reshape((1,-1))
+        action = 0.2*action.reshape((1,-1))+0.8*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
         filtered_action = self.env.previous_pos*.8 + action*.2
         self.env.previous_pos = action
         self.env.time_steps_in_current_episode = [self.env.time_steps_in_current_episode[i]+1 for i in range(self.env.num_robot)]
@@ -81,20 +81,21 @@ class CustomEnv(gym.Env):
 # check_env(env)
 # print('checked, no error!')
 # # # TRAIN CHECK # # #
-# import quad_multidirect_env as qa
-# from stable_baselines3 import SAC
+import quad_multidirect_env as qa
+from stable_baselines3 import SAC
 # Instantiate the env
-# env = CustomEnv(qa,render_mode = 'human')
-# # Define and Train the agent
-# model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
-# model.learn(5000)
-# model.save('SAC_tryout')
-# import time as t
-# model = SAC.load('SAC_tryout_colab_new',device='cpu')
-# obs, info = env.reset()
-# while True:
-#     t.sleep(0.05)
-#     action, _states = model.predict(obs, deterministic=True)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     if terminated or truncated:
-#         obs, info = env.reset()
+env = CustomEnv(qa,render_mode = 'human')
+# Define and Train the agent
+model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
+model.learn(5000)
+model.save('SAC_tryout')
+import time as t
+model = SAC.load('SAC_tryout_colab_new',device='cpu')
+obs, info = env.reset()
+while True:
+    t.sleep(0.05)
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, terminated, truncated, info = env.step(action)
+    print(reward)
+    if terminated or truncated:
+        obs, info = env.reset()
