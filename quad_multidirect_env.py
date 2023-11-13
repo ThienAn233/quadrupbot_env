@@ -362,7 +362,7 @@ class Quadrup_env():
 
         # Reward for being in good target direction
         align_vec = np.linalg.norm(self.target_dir_robot[client])
-        align = 10*(10-align_vec)
+        align = (10-align_vec)
         
         # Reward for being high
         high = -2*(-self.base_pos[client,-1]+.3) if self.base_pos[client,-1]<.3 else 0
