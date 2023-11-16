@@ -57,7 +57,7 @@ class Quadrup_env():
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = self.pi
+        self.T      = self.pi/4
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         self.terrain_shape  = [30, 30]
@@ -343,7 +343,7 @@ class Quadrup_env():
         return
     
     
-    def leg_traj(self,t,mag_thigh = 0.3,mag_bicep=0.3):
+    def leg_traj(self,t,mag_thigh = 0.6,mag_bicep=0.6):
         return np.hstack([np.zeros_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
@@ -355,14 +355,22 @@ class Quadrup_env():
         return action
     
     
+    def cal_rew(self,base_pos,target_pos):
+        b_x, b_y = base_pos[:,0], base_pos[:,1]
+        t_x, t_y = target_pos[:,0], target_pos[:,1]
+        phi      = np.arctan2(t_y,t_x) 
+        cosphi   = np.cos(phi)
+        sinphi   = np.sin(phi)
+        rew      = 10-np.sqrt(10*(b_x*sinphi-b_y*cosphi)**(2)+10*np.abs(b_x*cosphi+b_y*sinphi-10))
+    
+    
     def get_reward_value(self,client):
         # Reward for high speed in target velocity direction
         velo_vec = self.base_lin_vel[client][0]
         speed = velo_vec
 
         # Reward for being in good target direction
-        align_vec = np.linalg.norm(self.target_dir_robot[client])
-        align = (10-align_vec)
+        align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world)
         
         # Reward for being high
         high = -2*(-self.base_pos[client,-1]+.3) if self.base_pos[client,-1]<.3 else 0
