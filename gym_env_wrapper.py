@@ -24,7 +24,7 @@ class CustomEnv(gym.Env):
 
     def step(self, action, *args, **kwargs):
         action *= np.pi/4
-        action = 0.4*action.reshape((1,-1))+0.6*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
+        action = 0.2*action.reshape((1,-1))+0.8*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
         filtered_action = self.env.previous_pos*.8 + action*.2
         self.env.previous_pos = action
         self.env.time_steps_in_current_episode = [self.env.time_steps_in_current_episode[i]+1 for i in range(self.env.num_robot)]
@@ -37,6 +37,7 @@ class CustomEnv(gym.Env):
         # Get obs
         self.env.update_buffer(0)
         reward = np.array(self.env.get_reward_value(0))
+        print(reward)
         ori, high, dis = np.sum(self.env.base_ori[0][-1])/np.linalg.norm(self.env.base_ori[0]), self.env.base_pos[0][-1], np.linalg.norm(self.env.target_dir_robot[0])
         terminated = (ori<.5) | (high < 0.27)| (dis<0.5)
         truncated = self.env.time_steps_in_current_episode[0]>self.env.max_length
@@ -87,12 +88,12 @@ class CustomEnv(gym.Env):
 # from stable_baselines3 import SAC
 # # Instantiate the env
 # env = CustomEnv(qa,render_mode = 'human')
-# # Define and Train the agent
-# model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
-# model.learn(5000)
-# model.save('SAC_tryout')
+# # # Define and Train the agent
+# # model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
+# # model.learn(5000)
+# # model.save('SAC_tryout')
 # import time as t
-# model = SAC.load('SAC_tryout_new_new',device='cpu',print_system_info=True)
+# model = SAC.load('SAC_tryout_strict',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
 #     t.sleep(0.05)
