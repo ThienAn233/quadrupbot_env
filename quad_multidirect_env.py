@@ -361,7 +361,7 @@ class Quadrup_env():
         phi      = np.arctan2(t_y,t_x) 
         cosphi   = np.cos(phi)
         sinphi   = np.sin(phi)
-        rew      = 10-np.sqrt(10*(b_x*sinphi-b_y*cosphi)**(2)+10*np.abs(b_x*cosphi+b_y*sinphi-10))
+        return 10-np.sqrt(10*(b_x*sinphi-b_y*cosphi)**(2)+10*np.abs(b_x*cosphi+b_y*sinphi-10))
     
     
     def get_reward_value(self,client):

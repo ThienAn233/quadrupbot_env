@@ -75,7 +75,7 @@ class CustomEnv(gym.Env):
 # env.close
 # # # ENV CHECK # # #
 # from stable_baselines3.common.env_checker import check_env
-# import quad_cnn_env_no_contact as qa
+# import quad_multidirect_env as qa
 # env = CustomEnv(qa,render_mode = 'human')
 # # It will check your custom environment and output additional warnings if needed
 # check_env(env)
