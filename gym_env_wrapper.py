@@ -37,7 +37,6 @@ class CustomEnv(gym.Env):
         # Get obs
         self.env.update_buffer(0)
         reward = np.array(self.env.get_reward_value(0))
-        print(reward)
         ori, high, dis = np.sum(self.env.base_ori[0][-1])/np.linalg.norm(self.env.base_ori[0]), self.env.base_pos[0][-1], np.linalg.norm(self.env.target_dir_robot[0])
         terminated = (ori<.5) | (high < 0.27)| (dis<0.5)
         truncated = self.env.time_steps_in_current_episode[0]>self.env.max_length
