@@ -32,8 +32,8 @@ class CustomEnv(gym.Env):
             self.env.act(filtered_action)
             p.stepSimulation( physicsClientId=0)
             p.resetBasePositionAndOrientation(self.env.targetId,self.env.target_dir_world[0], [0,0,0,1], physicsClientId = 0)
-        if self.env.render_mode == "human":
-            self.env.viz()
+        # if self.env.render_mode == "human":
+            # self.env.viz()
         # Get obs
         self.env.update_buffer(0)
         reward = np.array(self.env.get_reward_value(0))
