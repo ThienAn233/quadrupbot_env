@@ -8,8 +8,8 @@
       <geometry>
         <sphere radius='0.5'/>
       </geometry>
-      <material name="red">
-        <color rgba="1 0 0 1"/>
+      <material name="blue">
+        <color rgba="0 0 1 1"/>
       </material>
     </visual>
     <inertial>
