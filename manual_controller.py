@@ -8,19 +8,20 @@ from gym_env_wrapper import CustomEnv
 import time as t
 
 
-env = CustomEnv(qa,render_mode="human")
-model = SAC.load('SAC_tryout_strict_new',device='cpu',print_system_info=True)
-# p.setRealTimeSimulation(True)
-
+env = CustomEnv(qa,render_mode="human",terrainHeight=[0,0.0])
+model = SAC.load('SAC_2024-01-06-16-51-02',device='cpu',print_system_info=True)
+p.setRealTimeSimulation(True)
+# Id = p.addUserDebugParameter("sleep time", rangeMin = 0., rangeMax = 1/24) 
 
 delay = 1./24.
 x_corr = 10
 y_corr = 0
-v_change = 0.05
+v_change = 0.1
 obs, info = env.reset()
 env.env.target_dir_world[0] = np.array([x_corr,y_corr,1])
 while True:
-    t.sleep(delay)
+    # t.sleep(delay)
+    env.stopper(delay)
     action, _states = model.predict(obs, deterministic=True)
     obs, reward, terminated, truncated, info = env.step(action)
     keys = p.getKeyboardEvents()
@@ -34,6 +35,7 @@ while True:
         x_corr -=v_change
     env.env.target_dir_world[0] = np.array([x_corr,y_corr,1])
     print(env.env.calculate_target(0))
+    # delay = p.readUserDebugParameter(Id)
     if terminated:# or truncated:
         obs, info = env.reset()
         print("YOU FAILED")

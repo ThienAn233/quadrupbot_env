@@ -4,7 +4,8 @@ import numpy as np
 import time as t
 
 # Variables
-PATH = 'quadrupbot_env\\quadrupv1.urdf'
+# PATH = 'quadrupbot_env\\quadrupv1.urdf'
+PATH = 'quadrupbot_env\\quadrup\\urdf\\Model_Doan_HK231_ASM_Dog_URDF.urdf'
 sleep_time = 1./240.
 initial_height = 0.2937
 initial_ori = [0,0,0,1]
@@ -18,7 +19,7 @@ temp_debug_value = []
 mode = p.POSITION_CONTROL
 physicsClient = p.connect(p.GUI)
 p.setAdditionalSearchPath(pybullet_data.getDataPath())
-
+p.setRealTimeSimulation(True)
 # Constants
 g = (0,0,-9.81) 
 pi = np.pi
@@ -46,7 +47,10 @@ previous_pos = np.zeros((len(jointId_list)))
 print('-'*100)
 
 
-def leg_traj(t,T,mag_thigh = 0.6,mag_bicep=0.6, scheme = 0):
+def leg_traj(t,T,mag_thigh = 0.3,mag_bicep=0.3, scheme = 0):
+    noise = np.random.uniform(-T/4,T/4,1)
+    print(noise)
+    # t += noise
     if scheme == 0:
         return np.hstack([np.zeros_like(t), mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
     if scheme == 1:
@@ -56,7 +60,7 @@ def leg_traj(t,T,mag_thigh = 0.6,mag_bicep=0.6, scheme = 0):
 
 
 def get_run_gait(T,t,scheme):
-    t       = np.array(t).reshape((-1,1))
+    t       = np.array(t,np.float32).reshape((-1,1))
     act1    = leg_traj(t,T,scheme=scheme)
     act2    = leg_traj(t+T/2,T,scheme=scheme)
     action  = np.hstack([act1,act2,act2,act1])
@@ -65,7 +69,7 @@ def get_run_gait(T,t,scheme):
 
 # Simulation loop
 time    = 0
-T       = 1.5*np.pi
+T       = 10*np.pi
 num_step= 10 
 scheme  = 1 
 fixed   = True
@@ -86,6 +90,10 @@ while True:
                                     # positionGains = np.ones_like(filtered_action)*.2,
                                     # velocityGains = np.ones_like(temp_debug_value)*0.,        
                                     )
-        p.stepSimulation()
-        t.sleep(sleep_time)
+        # p.stepSimulation()
+        start   = t.time()
+        stop    = start
+        while(stop<(start+sleep_time)):
+            stop = t.time()
+        # t.sleep(sleep_time)
     time += 1

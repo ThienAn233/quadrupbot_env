@@ -2,7 +2,7 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 import pybullet as p
-
+import time as t
 
 class CustomEnv(gym.Env):
     """Custom Environment that follows gym interface."""
@@ -21,8 +21,14 @@ class CustomEnv(gym.Env):
         # Example for using image as input (channel-first; channel-last also works):
         self.observation_space = spaces.Box(low = -3.4e+38, high = 3.4e+38,
                                             shape = (self.env.buffer_length*self.env.observation_space,), dtype = np.float32)
-
-    def step(self, action, *args, **kwargs):
+    
+    def stopper(self,time):
+        start   = t.time()
+        stop    = start
+        while(stop<(start+time)):
+            stop = t.time()
+    
+    def step(self, action,realtime=False, *args, **kwargs):
         action *= np.pi/4
         action = 0.2*action.reshape((1,-1))+0.8*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
         filtered_action = self.env.previous_pos*.8 + action*.2
@@ -32,6 +38,8 @@ class CustomEnv(gym.Env):
             self.env.act(filtered_action)
             p.stepSimulation( physicsClientId=0)
             p.resetBasePositionAndOrientation(self.env.targetId,self.env.target_dir_world[0], [0,0,0,1], physicsClientId = 0)
+        if realtime:
+            self.stopper(1./24.)
         # if self.env.render_mode == "human":
             # self.env.viz()
         # Get obs

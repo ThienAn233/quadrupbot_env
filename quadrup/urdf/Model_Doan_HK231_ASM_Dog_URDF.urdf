@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="quadrup">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.382868888957105" />
+      <inertia
+        ixx="0.000232445436878078"
+        ixy="2.37778762452196E-14"
+        ixz="1.92128795328865E-07"
+        iyy="0.000232617182321307"
+        iyz="-3.24177325290421E-14"
+        izz="0.000325745093873624" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="leg_right_front">
+    <inertial>
+      <origin
+        xyz="0.14711684616153 0.0673352164210883 -0.0101408682722447"
+        rpy="0 0 0" />
+      <mass
+        value="0.112174369943159" />
+      <inertia
+        ixx="1.94112267637735E-05"
+        ixy="-4.28200144523829E-07"
+        ixz="-6.55913870418751E-10"
+        iyy="3.66363936956841E-05"
+        iyz="-2.82551817811596E-10"
+        izz="3.68270404564996E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_front.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_front.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1_lrf"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_right_front" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_right_front1.1">
+    <inertial>
+      <origin
+        xyz="-0.0235694055422505 -0.00188445326675283 -0.0146673156055545"
+        rpy="0 0 0" />
+      <mass
+        value="0.0105672809279507" />
+      <inertia
+        ixx="2.85094813814072E-06"
+        ixy="2.52526135162662E-08"
+        ixz="-4.0963087070173E-06"
+        iyy="9.6735125308005E-06"
+        iyz="1.57147812508127E-08"
+        izz="6.88429928708425E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_front1.1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_front1.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.1_lrf"
+    type="revolute">
+    <origin
+      xyz="0.1345 0.0637499999999992 -0.0101999999999993"
+      rpy="0 0 0" />
+    <parent
+      link="leg_right_front" />
+    <child
+      link="leg_right_front1.1" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_right_front1.2">
+    <inertial>
+      <origin
+        xyz="0.0387030895245631 -0.00936090289722566 -0.0368234873031682"
+        rpy="0 0 0" />
+      <mass
+        value="0.0233626466083218" />
+      <inertia
+        ixx="2.65270461821195E-05"
+        ixy="3.46181135638184E-07"
+        ixz="2.67578997250576E-05"
+        iyy="5.49199124052956E-05"
+        iyz="-3.29368083237573E-07"
+        izz="2.91923744045958E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_front1.2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_front1.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.2_lrf"
+    type="revolute">
+    <origin
+      xyz="-0.0721671910673833 0.0162000000000004 -0.0449098712249736"
+      rpy="0 0 0" />
+    <parent
+      link="leg_right_front1.1" />
+    <child
+      link="leg_right_front1.2" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_right_back">
+    <inertial>
+      <origin
+        xyz="-0.123083152184718 0.0673352139819278 -0.0101408681334863"
+        rpy="0 0 0" />
+      <mass
+        value="0.1121743784994" />
+      <inertia
+        ixx="1.94112275755957E-05"
+        ixy="-4.2819784110199E-07"
+        ixz="-6.56378120003153E-10"
+        iyy="3.66364004059403E-05"
+        iyz="-2.82403459617044E-10"
+        izz="3.6827047985535E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_back.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_back.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1_lrb"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_right_back" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_right_back1.1">
+    <inertial>
+      <origin
+        xyz="-0.0235694055422511 -0.000234453266753157 -0.0146673156055546"
+        rpy="0 0 0" />
+      <mass
+        value="0.0105672809279507" />
+      <inertia
+        ixx="2.85094813814072E-06"
+        ixy="2.52526135162688E-08"
+        ixz="-4.0963087070173E-06"
+        iyy="9.67351253080049E-06"
+        iyz="1.57147812508142E-08"
+        izz="6.88429928708424E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_back1.1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_back1.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.1_lrb"
+    type="revolute">
+    <origin
+      xyz="-0.1357 0.0620999999999996 -0.0101999999999998"
+      rpy="0 0 0" />
+    <parent
+      link="leg_right_back" />
+    <child
+      link="leg_right_back1.1" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_right_back1.2">
+    <inertial>
+      <origin
+        xyz="0.0387030895245632 -0.00936090289722567 -0.0368234873031682"
+        rpy="0 0 0" />
+      <mass
+        value="0.0233626466083219" />
+      <inertia
+        ixx="2.65270461821195E-05"
+        ixy="3.4618113563819E-07"
+        ixz="2.67578997250577E-05"
+        iyy="5.49199124052957E-05"
+        iyz="-3.29368083237577E-07"
+        izz="2.91923744045958E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_back1.2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_right_back1.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.2_lrb"
+    type="revolute">
+    <origin
+      xyz="-0.0721671910673838 0.0178500000000001 -0.0449098712249736"
+      rpy="0 0 0" />
+    <parent
+      link="leg_right_back1.1" />
+    <child
+      link="leg_right_back1.2" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_left_front">
+    <inertial>
+      <origin
+        xyz="0.147285903596159 -0.0670634994667191 -0.00863009067399865"
+        rpy="0 0 0" />
+      <mass
+        value="0.112879360735619" />
+      <inertia
+        ixx="1.97267992447894E-05"
+        ixy="4.71156377097915E-07"
+        ixz="-2.31041512231938E-08"
+        iyy="3.74050185920932E-05"
+        iyz="-5.38599672276371E-09"
+        izz="3.72954507940468E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_front.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_front.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1_llf"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_left_front" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_left_front1.1">
+    <inertial>
+      <origin
+        xyz="-0.0201829060898926 0.000948612578875269 -0.0191297837087719"
+        rpy="0 0 0" />
+      <mass
+        value="0.0105672809279507" />
+      <inertia
+        ixx="4.60662839701264E-06"
+        ixy="-2.44867159960041E-07"
+        ixz="-4.55182540570307E-06"
+        iyy="9.66061099098475E-06"
+        iyz="-2.42665849785899E-07"
+        izz="5.14152056802804E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_front1.1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_front1.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.1_llf"
+    type="revolute">
+    <origin
+      xyz="0.1345 -0.0637155529176513 -0.00879427032280614"
+      rpy="0 0 0" />
+    <parent
+      link="leg_left_front" />
+    <child
+      link="leg_left_front1.1" />
+    <axis
+      xyz="0 0.998799753228262 -0.0489801281252161" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_left_front1.2">
+    <inertial>
+      <origin
+        xyz="0.0376235638373703 0.00749205731578731 -0.0383387713778731"
+        rpy="0 0 0" />
+      <mass
+        value="0.0233626464777189" />
+      <inertia
+        ixx="2.80740686991034E-05"
+        ixy="9.7606728602727E-07"
+        ixz="2.67745360843051E-05"
+        iyy="5.48876703050073E-05"
+        iyz="-9.96707077112438E-07"
+        izz="2.76775939399887E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_front1.2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_front1.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.2_llf"
+    type="revolute">
+    <origin
+      xyz="-0.0617980643369767 -0.0207370418706593 -0.057414147547947"
+      rpy="0 0 0" />
+    <parent
+      link="leg_left_front1.1" />
+    <child
+      link="leg_left_front1.2" />
+    <axis
+      xyz="0 0.998799753228262 -0.0489801281252177" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_left_back">
+    <inertial>
+      <origin
+        xyz="-0.12291409639043 -0.0670634994486883 -0.00863009067628879"
+        rpy="0 0 0" />
+      <mass
+        value="0.112879360808416" />
+      <inertia
+        ixx="1.97267992476244E-05"
+        ixy="4.71156365932039E-07"
+        ixz="-2.31041463579559E-08"
+        iyy="3.74050186419914E-05"
+        iyz="-5.38599547090938E-09"
+        izz="3.72954508461301E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_back.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_back.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1_llb"
+    type="revolute">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="leg_left_back" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_left_back1.1">
+    <inertial>
+      <origin
+        xyz="-0.0201829060898926 -5.01871743529975E-05 -0.0190808035806467"
+        rpy="0 0 0" />
+      <mass
+        value="0.0105672809279507" />
+      <inertia
+        ixx="4.60662839701265E-06"
+        ixy="-2.44867159960037E-07"
+        ixz="-4.55182540570307E-06"
+        iyy="9.66061099098475E-06"
+        iyz="-2.42665849785896E-07"
+        izz="5.14152056802805E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_back1.1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_back1.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.1_llb"
+    type="revolute">
+    <origin
+      xyz="-0.1357 -0.0627167531644228 -0.00884325045093167"
+      rpy="0 0 0" />
+    <parent
+      link="leg_left_back" />
+    <child
+      link="leg_left_back1.1" />
+    <axis
+      xyz="0 0.998799753228262 -0.0489801281252161" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+  <link
+    name="leg_left_back1.2">
+    <inertial>
+      <origin
+        xyz="0.0376235638373702 0.00749205731578728 -0.038338771377873"
+        rpy="0 0 0" />
+      <mass
+        value="0.0233626464777187" />
+      <inertia
+        ixx="2.80740686991034E-05"
+        ixy="9.76067286027284E-07"
+        ixz="2.67745360843051E-05"
+        iyy="5.48876703050072E-05"
+        iyz="-9.96707077112452E-07"
+        izz="2.76775939399886E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_back1.2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.698039215686274 0.698039215686274 0.698039215686274 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://quadrup/meshes/leg_left_back1.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="joint1.2_llb"
+    type="revolute">
+    <origin
+      xyz="-0.0617980643369767 -0.0217358416238875 -0.0573651674198217"
+      rpy="0 0 0" />
+    <parent
+      link="leg_left_back1.1" />
+    <child
+      link="leg_left_back1.2" />
+    <axis
+      xyz="0 0.998799753228262 -0.0489801281252177" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="1"
+      velocity="7.48" />
+  </joint>
+</robot>
