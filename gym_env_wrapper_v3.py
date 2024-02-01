@@ -93,21 +93,21 @@ class CustomEnv(gym.Env):
 
 
 # # # TRAIN CHECK # # #
-import quad_multi_direct_v3 as qa
-from stable_baselines3 import SAC
-# Instantiate the env
-env = CustomEnv(qa,render_mode = 'human')
-# # Define and Train the agent
-# model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
-# model.learn(5000)
-# model.save('SAC_tryout')
-import time as t
-model = SAC.load('SAC_v3_2024-01-31-15-53-22',device='cpu',print_system_info=True)
-obs, info = env.reset()
-while True:
-    t.sleep(0.05)
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, terminated, truncated, info = env.step(action)
-    print(reward)
-    if terminated or truncated:
-        obs, info = env.reset()
+# import quad_multi_direct_v3 as qa
+# from stable_baselines3 import SAC
+# # Instantiate the env
+# env = CustomEnv(qa,render_mode = 'human')
+# # # Define and Train the agent
+# # model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
+# # model.learn(5000)
+# # model.save('SAC_tryout')
+# import time as t
+# model = SAC.load('SAC_v3_2024-01-31-15-53-22',device='cpu',print_system_info=True)
+# obs, info = env.reset()
+# while True:
+#     t.sleep(0.05)
+#     action, _states = model.predict(obs, deterministic=True)
+#     obs, reward, terminated, truncated, info = env.step(action)
+#     print(reward)
+#     if terminated or truncated:
+#         obs, info = env.reset()
