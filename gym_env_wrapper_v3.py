@@ -30,7 +30,7 @@ class CustomEnv(gym.Env):
     
     def step(self, action,realtime=False, *args, **kwargs):
         action *= np.pi/4
-        action = 0.5*action.reshape((1,-1))+0.5*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
+        action = 0.2*action.reshape((1,-1))+0.8*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
         filtered_action = self.env.previous_pos*.5 + action*.5
         self.env.previous_pos = action
         self.env.time_steps_in_current_episode = [self.env.time_steps_in_current_episode[i]+1 for i in range(self.env.num_robot)]
@@ -93,21 +93,21 @@ class CustomEnv(gym.Env):
 
 
 # # # TRAIN CHECK # # #
-# import quad_multi_direct_v3 as qa
-# from stable_baselines3 import SAC
-# # Instantiate the env
-# env = CustomEnv(qa,render_mode = 'human')
-# # # Define and Train the agent
+import quad_multi_direct_v3 as qa
+from stable_baselines3 import SAC
+# Instantiate the env
+env = CustomEnv(qa,render_mode = 'human')
+# # Define and Train the agent
 # model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
 # model.learn(5000)
 # model.save('SAC_tryout')
-# import time as t
-# model = SAC.load('SAC_tryout_strict',device='cpu',print_system_info=True)
-# obs, info = env.reset()
-# while True:
-#     t.sleep(0.05)
-#     action, _states = model.predict(obs, deterministic=True)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     print(reward)
-#     if terminated or truncated:
-#         obs, info = env.reset()
+import time as t
+model = SAC.load('SAC_v3_2024-01-31-15-53-22',device='cpu',print_system_info=True)
+obs, info = env.reset()
+while True:
+    t.sleep(0.05)
+    action, _states = model.predict(obs, deterministic=True)
+    obs, reward, terminated, truncated, info = env.step(action)
+    print(reward)
+    if terminated or truncated:
+        obs, info = env.reset()
