@@ -38,7 +38,6 @@ class CustomEnv(gym.Env):
             self.env.act(filtered_action)
             p.stepSimulation( physicsClientId=0)
             p.resetBasePositionAndOrientation(self.env.targetId,self.env.target_dir_world[0], [0,0,0,1], physicsClientId = 0)
-            p.resetBasePositionAndOrientation(self.env.face_tarId,self.env.target_face_world[0], [0,0,0,1], physicsClientId = 0)
         if realtime:
             self.stopper(1./24.)
         # if self.env.render_mode == "human":
@@ -53,6 +52,7 @@ class CustomEnv(gym.Env):
         return self.env.obs_buffer[0].flatten().astype('float32'), reward.sum(), bool(terminated), bool(truncated), info
 
     def reset(self, seed = 0, *args, **kwargs):
+        self.env.sample_terrain(0)
         self.env.sample_target(0)
         self.env.reset_buffer(0)
         self.env.time_steps_in_current_episode[0] = 0
@@ -102,7 +102,7 @@ class CustomEnv(gym.Env):
 # # model.learn(5000)
 # # model.save('SAC_tryout')
 # import time as t
-# model = SAC.load('SAC_v3_2024-01-31-15-53-22',device='cpu',print_system_info=True)
+# model = SAC.load('SAC_v3_2024-02-01-07-12-41',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
 #     t.sleep(0.05)

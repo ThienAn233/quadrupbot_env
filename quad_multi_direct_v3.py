@@ -13,7 +13,6 @@ class Quadrup_env():
         debug           = False,
         robot_file      = 'quadrupbot_env//quadrup.urdf',
         target_file     = 'quadrupbot_env//target.urdf',
-        target_face     = 'quadrupbot_env//target_face.urdf',
         num_robot       = 1,
         terrainHeight   = [0., 0.],
         seed            = 0,
@@ -40,7 +39,6 @@ class Quadrup_env():
         self.debug              = debug
         self.robot_file         = robot_file
         self.target_file        = target_file
-        self.target_face        = target_face
         self.num_robot          = num_robot 
         self.num_ray            = 8
         self.radius             = 0.05
@@ -74,7 +72,7 @@ class Quadrup_env():
         w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
         x_v, y_v            = self.radius*np.cos(w_n), self.radius*np.sin(w_n)
         self.x_v, self.y_v  = x_v.flatten(), y_v.flatten()
-        self.terrain_shape  = [30, 30]
+        self.terrain_shape  = [5, 5]
         self.feet_list      = [2,5,8,11]
         self.terrainId      = [ -1 for i in range(self.num_robot)]
         self.collision      = [ -1 for i in range(self.num_robot)]
@@ -91,8 +89,6 @@ class Quadrup_env():
         self.base_ang_vel       = np.zeros((self.num_robot,3))
         self.target_dir_world   = np.zeros((self.num_robot,3))
         self.target_dir_robot   = np.zeros((self.num_robot,3))
-        self.target_face_world  = np.zeros((self.num_robot,3))
-        self.target_face_robot  = np.zeros((self.num_robot,3))
         
         
         # Setup the environment
@@ -103,7 +99,6 @@ class Quadrup_env():
             p.setGravity(*self.g, physicsClientId=client)
             p.loadURDF(self.robot_file, basePosition=[0,0,self.initialHeight],baseOrientation=[0,0,0,1], physicsClientId=client)
             p.loadURDF(self.target_file,basePosition=[0,0,self.initialHeight],baseOrientation=[0,0,0,1], physicsClientId=client)
-            p.loadURDF(self.target_face,basePosition=[0,0,self.initialHeight],baseOrientation=[0,0,0,1], physicsClientId=client)
             self.textureId = p.loadTexture('quadrupbot_env//color_map.png',physicsClientId=client)
             self.sample_terrain(client)
         self.number_of_joints = p.getNumJoints(self.robotId, physicsClientId = self.clientId[0])
@@ -176,11 +171,6 @@ class Quadrup_env():
         new_direction   = np.hstack([10*new_direction/np.linalg.norm(new_direction),np.array([self.initialHeight])])
         p.resetBasePositionAndOrientation(self.targetId, new_direction, random_Ori, physicsClientId = client)
         self.target_dir_world[client] = new_direction
-        # Sample target face
-        new_face_dir    = np.random.normal(0,5,2)
-        new_face_dir    = np.hstack([10*new_face_dir/np.linalg.norm(new_face_dir),np.array([self.initialHeight])])
-        p.resetBasePositionAndOrientation(self.face_tarId, new_face_dir, random_Ori, physicsClientId = client)
-        self.target_face_world[client] = new_face_dir
         return
     
     
@@ -310,15 +300,6 @@ class Quadrup_env():
         target_dir = target_dir
         self.target_dir_robot[client] = target_dir
         temp_obs_vaule += [*(target_dir/np.linalg.norm(target_dir))]
-        # Calculate face direction
-        face_dir =self.target_face_world[client] - base_pos
-        face_dir = np.array(list(face_dir)+[0])
-        face_norm = np.linalg.norm(face_dir)
-        face_dir = utils.active_rotation(np.array(base_orientation),face_dir)[:3]
-        face_dir = face_norm*np.array([face_dir[0],face_dir[1],0])
-        face_dir = face_dir
-        self.target_face_robot[client] = face_dir
-        temp_obs_vaule += [*(face_dir/np.linalg.norm(face_dir))]
         return temp_obs_vaule
     
     
@@ -406,7 +387,6 @@ class Quadrup_env():
             for client in self.clientId:
                 p.stepSimulation( physicsClientId=client)
                 p.resetBasePositionAndOrientation(self.targetId,self.target_dir_world[client], [0,0,0,1], physicsClientId = client)
-                p.resetBasePositionAndOrientation(self.face_tarId,self.target_face_world[client], [0,0,0,1], physicsClientId = client)
             if real_time:
                 t.sleep(self.sleep_time)
         if self.debug:
@@ -439,7 +419,6 @@ class Quadrup_env():
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+np.array([0,0,1]),lineWidth = 2, lifeTime =0.5, lineColorRGB = [0,0,1],replaceItemUniqueId=self.vizId_list[0],physicsClientId = client)
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+np.array([0,1,0]),lineWidth = 2, lifeTime =0.5, lineColorRGB = [0,1,0],replaceItemUniqueId=self.vizId_list[1],physicsClientId = client)
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+np.array([1,0,0]),lineWidth = 2, lifeTime =0.5, lineColorRGB = [1,0,0],replaceItemUniqueId=self.vizId_list[2],physicsClientId = client)
-        p.addUserDebugLine([0,0,1],np.array([0,0,1])+self.target_face_robot[client],lineWidth = 2, lifeTime =0.5, lineColorRGB = [0,0,1],replaceItemUniqueId=self.vizId_list[3],physicsClientId = client)
         p.addUserDebugLine([0,0,1],np.array([0,0,1])+self.target_dir_robot[client],lineWidth = 2, lifeTime =0.5, lineColorRGB = [1,0,0],replaceItemUniqueId=self.vizId_list[4],physicsClientId = client)
         return
 
@@ -471,11 +450,6 @@ class Quadrup_env():
     
     
     def get_reward_value(self,client):
-        
-        # Reward for good direction
-        a, b, c = self.base_fac[client]
-        x, y, z = self.target_face_world[client]
-        dir = np.exp(10*((a*x+b*y+c*z)/((a**2+b**2+c**2)*(x**2+y**2+z**2))**.5 - 1))
 
         # Reward for being in good position 
         align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world,client=client)
@@ -498,41 +472,41 @@ class Quadrup_env():
         # Reward for minimal contact force
         contact =(-5e-6)*((self.contact_force[client,:]**2).sum())
         
-        return [dir, align, high, surv, force,  contact]
+        return [ align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
 # import matplotlib.pyplot as plt
 # plt.ion()
-# r_name = ['dir', 'align', 'high', 'surv', 'force',  'contact']
+# r_name = ['align', 'high', 'surv', 'force',  'contact']
 # r_show = [[0 for i in range(240)] for i in range(len(r_name)+1)]
 # env = Quadrup_env(  render_mode     = 'human',
 #                     num_robot       = 1,
-#                     debug           = False,
+#                     debug           = True,
 #                     terrainHeight   = [0. ,0.05],
 #                     buffer_length   = 5
 #                   )
-# for time in range(1000):
+# for time in range(10000):
 #     # print(env.time_steps_in_current_episode)
 #     action = env.get_run_gait(env.time_steps_in_current_episode)
 #     # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
 #     obs, rew, inf = env.sim(action,real_time=False)
     
-#     ## plotting
-#     for i,name in enumerate(r_name):
-#         r_show[i].append(rew[0,i])
-#         r_show[i].pop(0)
-#         plt.plot(r_show[i],label=name)
-#     r_show[-1].append(np.sum(rew))
-#     r_show[-1].pop(0)
-#     plt.plot(r_show[-1],label='sum')
-#     plt.legend()
-#     plt.pause(1e-12)
-#     plt.clf()
-#     # t.sleep(1./240.)
-#     # t.sleep(.5)
-#     print(obs.shape,rew.shape,inf.shape)
-#     # print(env.time_steps_in_current_episode)
-#     # print(time,obs[0])
-#     # print(rew[0])
-#     # print(inf[0])
-#     # print('-'*100)
+    # # plotting
+    # for i,name in enumerate(r_name):
+    #     r_show[i].append(rew[0,i])
+    #     r_show[i].pop(0)
+    #     plt.plot(r_show[i],label=name)
+    # r_show[-1].append(np.sum(rew))
+    # r_show[-1].pop(0)
+    # plt.plot(r_show[-1],label='sum')
+    # plt.legend()
+    # plt.pause(1e-12)
+    # plt.clf()
+    # # t.sleep(1./240.)
+    # # t.sleep(.5)
+    # print(obs.shape,rew.shape,inf.shape)
+    # # print(env.time_steps_in_current_episode)
+    # # print(time,obs[0])
+    # # print(rew[0])
+    # # print(inf[0])
+    # # print('-'*100)
