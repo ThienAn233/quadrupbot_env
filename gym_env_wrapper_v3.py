@@ -76,7 +76,7 @@ class CustomEnv(gym.Env):
 # # print(obs.shape)
 # for _ in range(500):
 #     action = 2*np.random.random((env.env.action_space))-1
-#     print(action)
+#     # print(action)
 #     obs, reward, terminated, truncated, info = env.step(action)
 #     if truncated or terminated:
 #         obs, inf = env.reset()

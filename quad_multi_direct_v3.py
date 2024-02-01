@@ -175,13 +175,11 @@ class Quadrup_env():
     
     
     def sample_terrain(self, client):
-        print("CLIENT: ",client)
         numHeightfieldRows = int(self.terrain_shape[0]/(self.terrainScale[0]))
         numHeightfieldColumns = int(self.terrain_shape[1]/(self.terrainScale[1]))
 
         # Sample terrain num
         terrain_type = 3# np.random.randint(0,4)
-        print("Terrain type: ",terrain_type)
         x = np.linspace(-self.terrain_shape[0]/2,self.terrain_shape[0]/2,numHeightfieldRows)
         y = np.linspace(-self.terrain_shape[1]/2,self.terrain_shape[1]/2,numHeightfieldColumns)
         xx, yy = np.meshgrid(x,y)
@@ -222,8 +220,6 @@ class Quadrup_env():
                                     numHeightfieldColumns=numHeightfieldColumns, 
                                     physicsClientId=client)
             self.terrainId[client] = p.createMultiBody(0, self.collision[client], physicsClientId=client)
-        print("collision Id is: ",self.collision)
-        print("multibody Id is: ",self.terrainId)
         p.resetBasePositionAndOrientation(self.terrainId[client],[0,0,0], [0,0,0,1], physicsClientId=client)
         p.changeVisualShape(self.terrainId[client], -1, textureUniqueId = self.textureId, rgbaColor=[1,1,1,1],physicsClientId=client)
 
