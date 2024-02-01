@@ -457,7 +457,7 @@ class Quadrup_env():
         
         # Reward for termination
         ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
-        high = -10 if ori < .5 else 0
+        high = -5 if ori < .5 else 0
         
         # Reward for surviving 
         surv = 1
