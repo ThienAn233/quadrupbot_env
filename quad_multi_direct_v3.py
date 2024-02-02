@@ -72,7 +72,7 @@ class Quadrup_env():
         w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
         x_v, y_v            = self.radius*np.cos(w_n), self.radius*np.sin(w_n)
         self.x_v, self.y_v  = x_v.flatten(), y_v.flatten()
-        self.terrain_shape  = [5, 5]
+        self.terrain_shape  = [22, 22]
         self.feet_list      = [2,5,8,11]
         self.terrainId      = [ -1 for i in range(self.num_robot)]
         self.collision      = [ -1 for i in range(self.num_robot)]

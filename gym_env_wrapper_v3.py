@@ -30,8 +30,8 @@ class CustomEnv(gym.Env):
     
     def step(self, action,realtime=False, *args, **kwargs):
         action *= np.pi/4
-        action = 0.5*action.reshape((1,-1))+0.5*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
-        filtered_action = self.env.previous_pos*.5 + action*.5
+        action = 0.2*action.reshape((1,-1))+0.8*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
+        filtered_action = self.env.previous_pos*.8 + action*.2
         self.env.previous_pos = action
         self.env.time_steps_in_current_episode = [self.env.time_steps_in_current_episode[i]+1 for i in range(self.env.num_robot)]
         for _ in range(self.env.num_step):
@@ -71,12 +71,13 @@ class CustomEnv(gym.Env):
 # # # TEST CODE # # #
 # import quad_multi_direct_v3 as qa
 # import time as t
-# env = CustomEnv(qa,render_mode = 'human',max_length=500)
+# env = CustomEnv(qa,render_mode = 'human',max_length=500,buffer_length=5)
 # obs, info = env.reset()
 # # print(obs.shape)
 # for _ in range(500):
 #     action = 2*np.random.random((env.env.action_space))-1
 #     # print(action)
+#     t.sleep(0.05)
 #     obs, reward, terminated, truncated, info = env.step(action)
 #     if truncated or terminated:
 #         obs, inf = env.reset()
@@ -86,7 +87,7 @@ class CustomEnv(gym.Env):
 # # # ENV CHECK # # #
 # from stable_baselines3.common.env_checker import check_env
 # import quad_multi_direct_v3 as qa
-# env = CustomEnv(qa,render_mode = 'human')
+# env = CustomEnv(qa,render_mode = 'human',buffer_length=5)
 # # It will check your custom environment and output additional warnings if needed
 # check_env(env)
 # print('checked, no error!')
@@ -96,7 +97,7 @@ class CustomEnv(gym.Env):
 # import quad_multi_direct_v3 as qa
 # from stable_baselines3 import SAC
 # # Instantiate the env
-# env = CustomEnv(qa,render_mode = 'human')
+# env = CustomEnv(qa,render_mode = 'human',buffer_length=5)
 # # # Define and Train the agent
 # # model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
 # # model.learn(5000)
