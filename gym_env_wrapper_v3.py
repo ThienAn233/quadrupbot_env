@@ -69,19 +69,19 @@ class CustomEnv(gym.Env):
 
 
 # # # TEST CODE # # #
-import quad_multi_direct_v3 as qa
-import time as t
-env = CustomEnv(qa,render_mode = 'human',max_length=500,buffer_length=5)
-obs, info = env.reset()
-# print(obs.shape)
-for _ in range(5000000):
-    action = 2*np.random.random((env.env.action_space))-1
-    print(obs.shape)
-    t.sleep(0.05)
-    obs, reward, terminated, truncated, info = env.step(action)
-    if truncated or terminated:
-        obs, inf = env.reset()
-env.close
+# import quad_multi_direct_v3 as qa
+# import time as t
+# env = CustomEnv(qa,render_mode = 'human',max_length=500,buffer_length=5)
+# obs, info = env.reset()
+# # print(obs.shape)
+# for _ in range(5000000):
+#     action = 2*np.random.random((env.env.action_space))-1
+#     print(obs.shape)
+#     t.sleep(0.05)
+#     obs, reward, terminated, truncated, info = env.step(action)
+#     if truncated or terminated:
+#         obs, inf = env.reset()
+# env.close
 
 
 # # # ENV CHECK # # #
