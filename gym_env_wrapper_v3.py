@@ -52,7 +52,7 @@ class CustomEnv(gym.Env):
         return self.env.obs_buffer[0].flatten().astype('float32'), reward.sum(), bool(terminated), bool(truncated), info
 
     def reset(self, seed = 0, *args, **kwargs):
-        self.env.sample_terrain(0)
+        # self.env.sample_terrain(0)
         self.env.sample_target(0)
         self.env.reset_buffer(0)
         self.env.time_steps_in_current_episode[0] = 0
@@ -69,19 +69,19 @@ class CustomEnv(gym.Env):
 
 
 # # # TEST CODE # # #
-# import quad_multi_direct_v3 as qa
-# import time as t
-# env = CustomEnv(qa,render_mode = 'human',max_length=500,buffer_length=5)
-# obs, info = env.reset()
-# # print(obs.shape)
-# for _ in range(500):
-#     action = 2*np.random.random((env.env.action_space))-1
-#     # print(action)
-#     t.sleep(0.05)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     if truncated or terminated:
-#         obs, inf = env.reset()
-# env.close
+import quad_multi_direct_v3 as qa
+import time as t
+env = CustomEnv(qa,render_mode = 'human',max_length=500,buffer_length=5)
+obs, info = env.reset()
+# print(obs.shape)
+for _ in range(5000000):
+    action = 2*np.random.random((env.env.action_space))-1
+    print(obs.shape)
+    t.sleep(0.05)
+    obs, reward, terminated, truncated, info = env.step(action)
+    if truncated or terminated:
+        obs, inf = env.reset()
+env.close
 
 
 # # # ENV CHECK # # #
