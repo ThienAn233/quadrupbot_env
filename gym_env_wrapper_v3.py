@@ -30,8 +30,8 @@ class CustomEnv(gym.Env):
     
     def step(self, action,realtime=False, *args, **kwargs):
         action *= np.pi/4
-        action = 0.2*action.reshape((1,-1))+0.8*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
-        filtered_action = self.env.previous_pos*.8 + action*.2
+        action = 0.5*action.reshape((1,-1))+0.5*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
+        filtered_action = self.env.previous_pos*.5 + action*.5
         self.env.previous_pos = action
         self.env.time_steps_in_current_episode = [self.env.time_steps_in_current_episode[i]+1 for i in range(self.env.num_robot)]
         for _ in range(self.env.num_step):
@@ -103,7 +103,7 @@ class CustomEnv(gym.Env):
 # # model.learn(5000)
 # # model.save('SAC_tryout')
 # import time as t
-# model = SAC.load('SAC_v3_2024-02-01-07-12-41',device='cpu',print_system_info=True)
+# model = SAC.load('SAC_v3_2024-02-03-17-31-43',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
 #     t.sleep(0.05)

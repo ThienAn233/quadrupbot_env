@@ -66,7 +66,7 @@ class Quadrup_env():
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = self.pi/4
+        self.T      = 2*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
@@ -339,7 +339,7 @@ class Quadrup_env():
         ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
         truncation = self.truncation_check(ori,client)
         if truncation:
-            self.sample_terrain(client)
+            # self.sample_terrain(client)
             self.sample_target(client)
             self.reset_buffer(client)
             self.time_steps_in_current_episode[client] = 0
@@ -424,7 +424,7 @@ class Quadrup_env():
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,mag_thigh = 0.3,mag_bicep=0.3):
+    def leg_traj(self,t,mag_thigh = 0.7,mag_bicep=0.7):
         return np.hstack([np.zeros_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
@@ -457,7 +457,7 @@ class Quadrup_env():
         
         # Reward for termination
         ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
-        high = -5 if ori < .5 else 0
+        high = -1 if ori < .5 else 0
         
         # Reward for surviving 
         surv = 1
