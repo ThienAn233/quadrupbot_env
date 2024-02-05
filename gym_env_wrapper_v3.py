@@ -103,7 +103,7 @@ class CustomEnv(gym.Env):
 # # model.learn(5000)
 # # model.save('SAC_tryout')
 # import time as t
-# model = SAC.load('SAC_v3_2024-02-03-17-31-43',device='cpu',print_system_info=True)
+# model = SAC.load('SAC_v3_2024-02-05-16-40-33',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
 #     t.sleep(0.05)

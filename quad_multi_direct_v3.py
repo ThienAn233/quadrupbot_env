@@ -179,7 +179,7 @@ class Quadrup_env():
         numHeightfieldColumns = int(self.terrain_shape[1]/(self.terrainScale[1]))
 
         # Sample terrain num
-        terrain_type = 2# np.random.randint(0,4)
+        terrain_type = 3# np.random.randint(0,4)
         x = np.linspace(-self.terrain_shape[0]/2,self.terrain_shape[0]/2,numHeightfieldRows)
         y = np.linspace(-self.terrain_shape[1]/2,self.terrain_shape[1]/2,numHeightfieldColumns)
         xx, yy = np.meshgrid(x,y)
@@ -196,11 +196,11 @@ class Quadrup_env():
             zz = np.round(a*(np.sin(b*xx-np.pi/2)),1)*c
             self.zz_height[client] = -a*c
         if terrain_type == 3 :
-            a = np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
-            b = np.random.uniform(0.5,1.5)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
+            a = np.random.uniform(3.,7.)        # cang lon thi dinh cang lon (so luong bac thang)
+            b = np.random.uniform(0.5,1.)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
             c = 0.1      # cao do bac thang
-            zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy-np.pi*3/2)))
-            self.zz_height[client] = 0*c*a
+            zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy+np.pi*3/2)))
+            self.zz_height[client] = -2*c*a+0.05
         print(f'a:{a}, b:{b}, c:{c}')
         self.zz_maps[client] = zz
         heightfieldData = zz.flatten()
@@ -484,7 +484,7 @@ class Quadrup_env():
 # env = Quadrup_env(  render_mode     = 'human',
 #                     num_robot       = 1,
 #                     debug           = True,
-#                     terrainHeight   = [0. ,0.05],
+#                     terrainHeight   = [0., 0.],
 #                     buffer_length   = 5
 #                   )
 # for time in range(10000):
