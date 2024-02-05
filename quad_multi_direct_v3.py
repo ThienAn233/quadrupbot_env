@@ -66,7 +66,7 @@ class Quadrup_env():
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 2*self.pi
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
@@ -179,7 +179,7 @@ class Quadrup_env():
         numHeightfieldColumns = int(self.terrain_shape[1]/(self.terrainScale[1]))
 
         # Sample terrain num
-        terrain_type = 3# np.random.randint(0,4)
+        terrain_type = 2# np.random.randint(0,4)
         x = np.linspace(-self.terrain_shape[0]/2,self.terrain_shape[0]/2,numHeightfieldRows)
         y = np.linspace(-self.terrain_shape[1]/2,self.terrain_shape[1]/2,numHeightfieldColumns)
         xx, yy = np.meshgrid(x,y)
@@ -192,15 +192,16 @@ class Quadrup_env():
             zz = a*(np.cos(b*xx)+np.cos(c*yy)) + np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[client] = 2*a
         if terrain_type == 2 :
-            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(0.2,0.5), np.random.uniform(0.5,2.)
-            zz = np.round(a*(np.sin(b*xx)),1)*c
-            self.zz_height[client] = a*c
+            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), np.random.uniform(.8,1.)
+            zz = np.round(a*(np.sin(b*xx-np.pi/2)),1)*c
+            self.zz_height[client] = -a*c
         if terrain_type == 3 :
             a = np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
             b = np.random.uniform(0.5,1.5)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
             c = 0.1      # cao do bac thang
             zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy-np.pi*3/2)))
             self.zz_height[client] = 0*c*a
+        print(f'a:{a}, b:{b}, c:{c}')
         self.zz_maps[client] = zz
         heightfieldData = zz.flatten()
         if self.collision[client] == -1:
@@ -424,7 +425,7 @@ class Quadrup_env():
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.5,mag_bicep=0.5,swing=0.4):
+    def leg_traj(self,t,side,mag_thigh = 0.3,mag_bicep=0.3,swing=0.4):
         if side == 'l':
             return np.hstack([swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
@@ -490,7 +491,7 @@ class Quadrup_env():
 #     # print(env.time_steps_in_current_episode)
 #     action = env.get_run_gait(env.time_steps_in_current_episode)
 #     # action = np.random.uniform(-.1,.1,(env.num_robot,env.number_of_joints))
-#     obs, rew, inf = env.sim(action,real_time=False)
+#     obs, rew, inf = env.sim(action,real_time=True)
     
     # # plotting
     # for i,name in enumerate(r_name):
