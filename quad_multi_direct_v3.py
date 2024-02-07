@@ -333,7 +333,7 @@ class Quadrup_env():
     
     
     def truncation_check(self,ori,client):
-        return  (self.time_steps_in_current_episode[client]>self.max_length) | (ori<.5)
+        return  (self.time_steps_in_current_episode[client]>self.max_length) | (ori<.3)
     
     
     def auto_reset(self,client):
@@ -425,7 +425,7 @@ class Quadrup_env():
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.3,mag_bicep=0.3,swing=0.4):
+    def leg_traj(self,t,side,mag_thigh = 0.5,mag_bicep=0.5,swing=0.4):
         if side == 'l':
             return np.hstack([swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
