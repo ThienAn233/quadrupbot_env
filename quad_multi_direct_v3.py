@@ -198,7 +198,7 @@ class Quadrup_env():
         if terrain_type == 3 :
             a = np.random.uniform(3.,7.)        # cang lon thi dinh cang lon (so luong bac thang)
             b = np.random.uniform(0.5,1.)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
-            c = 0.1      # cao do bac thang
+            c = 0.06      # cao do bac thang
             zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy+np.pi*3/2)))
             self.zz_height[client] = -2*c*a+0.05
         print(f'a:{a}, b:{b}, c:{c}')
@@ -425,7 +425,7 @@ class Quadrup_env():
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.5,mag_bicep=0.5,swing=0.4):
+    def leg_traj(self,t,side,mag_thigh = 0.3,mag_bicep=0.3,swing=0.3):
         if side == 'l':
             return np.hstack([swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
@@ -456,10 +456,6 @@ class Quadrup_env():
         # Reward for being in good position 
         align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world,client=client)
         
-        # Reward for high speed in target velocity direction
-        velo_vec = self.base_lin_vel[client][0]
-        speed = velo_vec
-        
         # Reward for termination
         ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
         high = -1 if ori < .5 else 0
@@ -473,7 +469,7 @@ class Quadrup_env():
         # Reward for minimal contact force
         contact =(-1e-6)*((self.contact_force[client,:]**2).sum())
         
-        return [ align, speed, high, surv, force,  contact]
+        return [ align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
 # import matplotlib.pyplot as plt

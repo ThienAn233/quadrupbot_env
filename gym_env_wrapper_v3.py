@@ -30,7 +30,7 @@ class CustomEnv(gym.Env):
     
     def step(self, action,realtime=False, *args, **kwargs):
         action *= np.pi/4
-        action = 0.5*action.reshape((1,-1))+0.5*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
+        action = 0.2*action.reshape((1,-1))+0.8*self.env.get_run_gait(self.env.time_steps_in_current_episode[0])
         filtered_action = self.env.previous_pos*.8 + action*.2
         self.env.previous_pos = action
         self.env.time_steps_in_current_episode = [self.env.time_steps_in_current_episode[i]+1 for i in range(self.env.num_robot)]
