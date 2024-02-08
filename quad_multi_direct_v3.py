@@ -456,10 +456,9 @@ class Quadrup_env():
         # Reward for being in good position 
         align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world,client=client)
         
-        # Reward for being high
-        # high = -2*(-self.base_pos[client,-1]+.3) if self.base_pos[client,-1]<.3 else 0
-        # high = -5*(0.1-self.ray_start_end[client][-1].mean()) if self.ray_start_end[client][-1].mean() < 0.11 else 0
-        # print(high)
+        # Reward for high speed in target velocity direction
+        velo_vec = self.base_lin_vel[client][0]
+        speed = velo_vec
         
         # Reward for termination
         ori = np.sum(self.base_ori[client][-1])/np.linalg.norm(self.base_ori[client])
@@ -474,12 +473,12 @@ class Quadrup_env():
         # Reward for minimal contact force
         contact =(-1e-6)*((self.contact_force[client,:]**2).sum())
         
-        return [ align, high, surv, force,  contact]
+        return [ align, speed, high, surv, force,  contact]
     
 # # # TEST CODE # # #
 # import matplotlib.pyplot as plt
 # plt.ion()
-# r_name = ['align', 'high', 'surv', 'force',  'contact']
+# r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
 # r_show = [[0 for i in range(240)] for i in range(len(r_name)+1)]
 # env = Quadrup_env(  render_mode     = 'human',
 #                     num_robot       = 1,

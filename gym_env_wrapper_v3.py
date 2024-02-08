@@ -46,7 +46,7 @@ class CustomEnv(gym.Env):
         self.env.update_buffer(0)
         reward = np.array(self.env.get_reward_value(0))
         ori = np.sum(self.env.base_ori[0][-1])/np.linalg.norm(self.env.base_ori[0])
-        terminated = (ori<.5) 
+        terminated = (ori<.3) 
         truncated = self.env.time_steps_in_current_episode[0]>self.env.max_length
         info = {}
         return self.env.obs_buffer[0].flatten().astype('float32'), reward.sum(), bool(terminated), bool(truncated), info
@@ -103,7 +103,7 @@ class CustomEnv(gym.Env):
 # # model.learn(5000)
 # # model.save('SAC_tryout')
 # import time as t
-# model = SAC.load('SAC_v3_2024-02-05-16-40-33',device='cpu',print_system_info=True)
+# model = SAC.load('SAC_v3_2024-02-07-16-45-32',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
 #     t.sleep(0.05)
