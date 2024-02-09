@@ -96,16 +96,16 @@ class CustomEnv(gym.Env):
 # # # TRAIN CHECK # # #
 # import quad_multi_direct_v3 as qa
 # from stable_baselines3 import SAC
-# # Instantiate the env
+# # # Instantiate the env
 
-# # # # Define and Train the agent
+# # # # # Define and Train the agent
 # # env = CustomEnv(qa,buffer_length=5)
-# # model = SAC(policy="MlpPolicy",env=env,verbose=1,buffer_size=10)
-# # model.learn(5000)
+# # model = SAC(policy="MlpPolicy",batch_size=2048,learning_rate=1e-4,env=env,verbose=1)
+# # model.learn(300000)
 # # model.save('SAC_tryout')
 # import time as t
 # env = CustomEnv(qa,render_mode = 'human',buffer_length=5)
-# model = SAC.load('SAC_v3_2024-02-07-16-45-32',device='cpu',print_system_info=True)
+# model = SAC.load('SAC_v3_2024-02-08-17-38-10',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
 #     t.sleep(0.05)

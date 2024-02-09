@@ -17,6 +17,7 @@ class Quadrup_env():
         terrainHeight   = [0., 0.],
         seed            = 0,
         buffer_length   = 60,
+        terrain_type        = None,
     ):
         # Configurable variables
         self.clientId           = []
@@ -48,6 +49,7 @@ class Quadrup_env():
         self.initialFriction    = [0.8, 1.5]
         self.terrainHeight      = terrainHeight
         self.buffer_length      = buffer_length
+        self.terrain_type       = terrain_type
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937
         self.jointId_list       = []
@@ -179,12 +181,16 @@ class Quadrup_env():
         numHeightfieldColumns = int(self.terrain_shape[1]/(self.terrainScale[1]))
 
         # Sample terrain num
-        terrain_type = 3# np.random.randint(0,4)
+        if self.terrain_type:
+            terrain_type = self.terrain_type
+        else:
+            terrain_type = np.random.randint(0,4)
         x = np.linspace(-self.terrain_shape[0]/2,self.terrain_shape[0]/2,numHeightfieldRows)
         y = np.linspace(-self.terrain_shape[1]/2,self.terrain_shape[1]/2,numHeightfieldColumns)
         xx, yy = np.meshgrid(x,y)
         
         if terrain_type == 0 :
+            a,b,c = 0, self.terrainHeight[0], self.terrainHeight[-1]
             zz = np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[client] = 0
         if terrain_type == 1 :
@@ -479,8 +485,9 @@ class Quadrup_env():
 # env = Quadrup_env(  render_mode     = 'human',
 #                     num_robot       = 1,
 #                     debug           = True,
-#                     terrainHeight   = [0., 0.],
-#                     buffer_length   = 5
+#                     terrainHeight   = [0., 0.06],
+#                     buffer_length   = 5,
+#                     terrain_type=0
 #                   )
 # for time in range(10000):
 #     # print(env.time_steps_in_current_episode)
