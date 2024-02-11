@@ -45,10 +45,10 @@ class CustomEnv(gym.Env):
         # Get obs
         self.env.update_buffer(0)
         reward = np.array(self.env.get_reward_value(0))
-        ori = np.sum(self.env.base_ori[0][-1])/np.linalg.norm(self.env.base_ori[0])
-        terminated = (ori<.3) 
+        ori, dis = np.sum(self.env.base_ori[0][-1])/np.linalg.norm(self.env.base_ori[0]),np.linalg.norm(self.env.target_dir_robot[0])
+        terminated = (ori<.3) | (dis < .5)
         truncated = self.env.time_steps_in_current_episode[0]>self.env.max_length
-        info = {}
+        info = (reward)
         return self.env.obs_buffer[0].flatten().astype('float32'), reward.sum(), bool(terminated), bool(truncated), info
 
     def reset(self, seed = 0, *args, **kwargs):
@@ -57,8 +57,8 @@ class CustomEnv(gym.Env):
         self.env.reset_buffer(0)
         self.env.time_steps_in_current_episode[0] = 0
         self.env.previous_pos[0] = np.zeros((len(self.env.jointId_list)))
-        info = None
-        return self.env.obs_buffer[0].flatten().astype('float32'), {}
+        info = ()
+        return self.env.obs_buffer[0].flatten().astype('float32'), info
 
     def render(self):
         self.env.viz()
@@ -96,7 +96,7 @@ class CustomEnv(gym.Env):
 # # # TRAIN CHECK # # #
 # import quad_multi_direct_v3 as qa
 # from stable_baselines3 import SAC
-# # # Instantiate the env
+# # # # Instantiate the env
 
 # # # # # Define and Train the agent
 # # env = CustomEnv(qa,buffer_length=5)
@@ -104,13 +104,30 @@ class CustomEnv(gym.Env):
 # # model.learn(300000)
 # # model.save('SAC_tryout')
 # import time as t
-# env = CustomEnv(qa,render_mode = 'human',buffer_length=5)
-# model = SAC.load('SAC_v3_2024-02-08-17-38-10',device='cpu',print_system_info=True)
+# import matplotlib.pyplot as plt
+# plt.ion()
+# r_name = ['align', 'high', 'surv', 'force',  'contact']
+# r_show = [[0 for i in range(240)] for i in range(len(r_name)+1)]
+# env = CustomEnv(qa,render_mode = 'human',buffer_length=5,terrain_type=3,terrainHeight=[0,0.],max_length=2000)
+# model = SAC.load('SAC_v3_2024-02-11-14-29-45_500k_gSDE',device='cpu',print_system_info=True)
+# # model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
-#     t.sleep(0.05)
+#     # t.sleep(0.05)
 #     action, _states = model.predict(obs, deterministic=True)
 #     obs, reward, terminated, truncated, info = env.step(action)
 #     print(reward)
 #     if terminated or truncated:
 #         obs, info = env.reset()
+    
+#     # # plotting
+#     # for i,name in enumerate(r_name):
+#     #     r_show[i].append(info[i])
+#     #     r_show[i].pop(0)
+#     #     plt.plot(r_show[i],label=name)
+#     # r_show[-1].append(np.sum(info))
+#     # r_show[-1].pop(0)
+#     # plt.plot(r_show[-1],label='sum')
+#     # plt.legend()
+#     # plt.pause(1e-12)
+#     # plt.clf()

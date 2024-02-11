@@ -194,16 +194,16 @@ class Quadrup_env():
             zz = np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[client] = 0
         if terrain_type == 1 :
-            a, b, c = np.random.uniform(0.15,0.35), np.random.uniform(1,1.5), np.random.uniform(1,1.5)
+            a, b, c = np.random.uniform(0.15,0.35), np.random.uniform(.3,.5), np.random.uniform(.3,.5)
             zz = a*(np.cos(b*xx)+np.cos(c*yy)) + np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[client] = 2*a
         if terrain_type == 2 :
-            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), np.random.uniform(.8,1.)
+            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), 0.6
             zz = np.round(a*(np.sin(b*xx-np.pi/2)),1)*c
             self.zz_height[client] = -a*c
         if terrain_type == 3 :
-            a = np.random.uniform(3.,7.)        # cang lon thi dinh cang lon (so luong bac thang)
-            b = np.random.uniform(0.5,1.)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
+            a = 2 #np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
+            b = np.random.uniform(1.5,2)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
             c = 0.06      # cao do bac thang
             zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy+np.pi*3/2)))
             self.zz_height[client] = -2*c*a+0.05
@@ -480,7 +480,7 @@ class Quadrup_env():
 # # # TEST CODE # # #
 # import matplotlib.pyplot as plt
 # plt.ion()
-# r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
+# r_name = ['align', 'high', 'surv', 'force',  'contact']
 # r_show = [[0 for i in range(240)] for i in range(len(r_name)+1)]
 # env = Quadrup_env(  render_mode     = 'human',
 #                     num_robot       = 1,
