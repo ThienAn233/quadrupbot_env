@@ -57,7 +57,7 @@ class Quadrup_env():
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = self.pi/4
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         self.terrain_shape  = [30, 30]
@@ -343,15 +343,20 @@ class Quadrup_env():
         return
     
     
-    def leg_traj(self,t,mag_thigh = 0.3,mag_bicep=0.3):
-        return np.hstack([np.zeros_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+    def leg_traj(self,t,side,mag_thigh = 0.3,mag_bicep=0.3,swing=0.3):
+        if side == 'l':
+            return np.hstack([swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+        if side == 'r':
+            return np.hstack([-swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
     def get_run_gait(self,t):
         t       = np.array(t).reshape((-1,1))
-        act1    = self.leg_traj(t)
-        act2    = self.leg_traj(t+self.T/2)
-        action  = np.hstack([act1,act2,act2,act1])
+        act1    = self.leg_traj(t,'l')
+        act2    = self.leg_traj(t+self.T/2,'r')
+        act3    = self.leg_traj(t+self.T/2,'l')
+        act4    = self.leg_traj(t,'r')
+        action  = np.hstack([act1,act2,act3,act4])
         return action
     
     

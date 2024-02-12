@@ -68,19 +68,21 @@ class CustomEnv(gym.Env):
 
 
 # # # TEST CODE # # #
-# import quad_cnn_env_no_contact as qa
+# import quad_multidirect_env as qa
 # import time as t
 # env = CustomEnv(qa,render_mode = 'human',max_length=500)
 # obs, info = env.reset()
 # # print(obs.shape)
-# for _ in range(500):
+# for _ in range(5000):
 #     action = np.random.random((env.env.action_space))
 #     print(action)
 #     obs, reward, terminated, truncated, info = env.step(action)
 #     if truncated or terminated:
 #         obs, inf = env.reset()
-#     t.sleep(0.5)
+#     t.sleep(0.05)
 # env.close
+
+
 # # # ENV CHECK # # #
 # from stable_baselines3.common.env_checker import check_env
 # import quad_multidirect_env as qa
