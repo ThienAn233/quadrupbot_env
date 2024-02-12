@@ -46,7 +46,7 @@ class CustomEnv(gym.Env):
         self.env.update_buffer(0)
         reward = np.array(self.env.get_reward_value(0))
         ori, high, dis = np.sum(self.env.base_ori[0][-1])/np.linalg.norm(self.env.base_ori[0]), self.env.base_pos[0][-1], np.linalg.norm(self.env.target_dir_robot[0])
-        terminated = (ori<.5) | (high < 0.27)| (dis<0.5)
+        terminated = (ori<.5) | (dis<0.5)
         truncated = self.env.time_steps_in_current_episode[0]>self.env.max_length
         info = {}
         return self.env.obs_buffer[0].flatten().astype('float32'), reward.sum(), bool(terminated), bool(truncated), info
@@ -70,7 +70,7 @@ class CustomEnv(gym.Env):
 # # # TEST CODE # # #
 # import quad_multidirect_env as qa
 # import time as t
-# env = CustomEnv(qa,render_mode = 'human',max_length=500)
+# env = CustomEnv(qa,render_mode = 'human',max_length=500,terrainHeight   = [0. ,0.05])
 # obs, info = env.reset()
 # # print(obs.shape)
 # for _ in range(5000):
