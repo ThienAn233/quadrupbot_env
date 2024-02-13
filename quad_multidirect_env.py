@@ -372,7 +372,7 @@ class Quadrup_env():
     def get_reward_value(self,client):
         # Reward for high speed in target velocity direction
         velo_vec = self.base_lin_vel[client][0]
-        speed = velo_vec
+        speed = 0#velo_vec
 
         # Reward for being in good target direction
         align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world,client=client)
@@ -395,6 +395,10 @@ class Quadrup_env():
         return [speed, align, high, surv, force,  contact]
     
 # # # TEST CODE # # #
+# import matplotlib.pyplot as plt
+# plt.ion()
+# r_name = ['speed', 'align', 'high', 'surv', 'force',  'contact']
+# r_show = [[0 for i in range(240)] for i in range(len(r_name)+1)]
 # env = Quadrup_env(  render_mode     = 'human',
 #                     num_robot       = 2,
 #                     debug           = True,
@@ -408,6 +412,26 @@ class Quadrup_env():
 #     # t.sleep(1./240.)
 #     # t.sleep(.5)
 #     # print(obs.shape,rew.shape,inf.shape)
+#     # print(env.time_steps_in_current_episode)
+#     # print(time,obs[0])
+#     # print(rew[0])
+#     # print(inf[0])
+#     # print('-'*100)
+
+#     # plotting
+#     for i,name in enumerate(r_name):
+#         r_show[i].append(rew[0,i])
+#         r_show[i].pop(0)
+#         plt.plot(r_show[i],label=name)
+#     r_show[-1].append(np.sum(rew))
+#     r_show[-1].pop(0)
+#     plt.plot(r_show[-1],label='sum')
+#     plt.legend()
+#     plt.pause(1e-12)
+#     plt.clf()
+#     # t.sleep(1./240.)
+#     # t.sleep(.5)
+#     print(obs.shape,rew.shape,inf.shape)
 #     # print(env.time_steps_in_current_episode)
 #     # print(time,obs[0])
 #     # print(rew[0])
