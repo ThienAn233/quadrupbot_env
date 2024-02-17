@@ -479,7 +479,7 @@ class Quadrup_env(gym.Env):
         align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world,client=client)
         
         # Reward for high speed in target velocity direction
-        speed = 0.2*self.base_lin_vel[0][0]
+        speed = self.base_lin_vel[0][0]
         
         # Reward for termination
         ori = np.sum(self.base_ori[0][-1])/np.linalg.norm(self.base_ori[0])
@@ -519,11 +519,10 @@ class Quadrup_env(gym.Env):
 # # # TRAIN CHECK # # #
 # from stable_baselines3 import SAC
 # # # # Instantiate the env
-
-# # # # # # Define and Train the agent
-# env = Quadrup_env(buffer_length=5,terrain_type=3,terrainHeight=[0,0.1],max_length=500)
-# model = SAC(policy="MlpPolicy",batch_size=2048,learning_rate=1e-4,env=env,verbose=1)
-# model.learn(300000)
+# # # # Define and Train the agent
+# # env = Quadrup_env(buffer_length=5,terrain_type=3,terrainHeight=[0,0.1],max_length=500)
+# # model = SAC(policy="MlpPolicy",batch_size=2048,learning_rate=1e-4,env=env,verbose=1)
+# # model.learn(300000)
 # # model.save('SAC_tryout')
 # import time as t
 # import matplotlib.pyplot as plt
@@ -541,7 +540,7 @@ class Quadrup_env(gym.Env):
 #     if terminated or truncated:
 #         obs, info = env.reset()
     
-#     # # plotting
+#     # # # plotting
 #     # for i,name in enumerate(r_name):
 #     #     r_show[i].append(info[name])
 #     #     r_show[i].pop(0)
