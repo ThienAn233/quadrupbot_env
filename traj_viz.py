@@ -47,7 +47,7 @@ previous_pos = np.zeros((len(jointId_list)))
 print('-'*100)
 
 
-def leg_traj(t,T,side, mag_thigh = 0.3,mag_bicep=0.3, swing=0.4, scheme = 0):
+def leg_traj(t,T,side, mag_thigh = 0.4,mag_bicep=0.4, swing=0.3, scheme = 0):
     noise = np.random.uniform(-T/4,T/4,1)
     print(noise)
     # t += noise
@@ -55,7 +55,7 @@ def leg_traj(t,T,side, mag_thigh = 0.3,mag_bicep=0.3, swing=0.4, scheme = 0):
         if side == 'l':
             return np.hstack([ swing*np.ones_like(t), mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
         else:
-            return np.hstack([-swing*np.ones_like(t), -mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
+            return np.hstack([-swing*np.ones_like(t), mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
     if scheme == 1:
         if side == 'l':
             return np.hstack([ swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
@@ -82,7 +82,7 @@ def get_run_gait(T,t,scheme):
 time    = 0
 T       = 4*np.pi
 num_step= 10 
-scheme  = 1
+scheme  = 2
 fixed   = False
 
 while True:

@@ -374,8 +374,8 @@ class Quadrup_env(gym.Env):
             ori, dis = np.sum(self.base_ori[0][-1])/np.linalg.norm(self.base_ori[0]),np.linalg.norm(self.target_dir_robot[0])
             terminated = (ori<.3) | (dis < .5)
             truncated = self.time_steps_in_current_episode[0]>self.max_length
-        r_name = ('align', 'high', 'surv', 'force',  'contact')
-        info = dict.fromkeys(r_name,tuple(reward)[0])
+        r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
+        info = dict(zip(r_name,reward))
         return self.obs_buffer[0].flatten().astype('float32'), reward.sum(), bool(terminated), bool(truncated), info
     
     
@@ -447,11 +447,11 @@ class Quadrup_env(gym.Env):
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.3,mag_bicep=0.3,swing=0.3):
+    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.4,swing=0.3):
         if side == 'l':
-            return np.hstack([swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+            return np.hstack([ swing*np.ones_like(t),-mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
-            return np.hstack([-swing*np.ones_like(t), mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+            return np.hstack([-swing*np.ones_like(t),-mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
     def get_run_gait(self,t):
@@ -478,6 +478,9 @@ class Quadrup_env(gym.Env):
         # Reward for being in good position 
         align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world,client=client)
         
+        # Reward for high speed in target velocity direction
+        speed = 0.2*self.base_lin_vel[client][0]
+        
         # Reward for termination
         ori = np.sum(self.base_ori[0][-1])/np.linalg.norm(self.base_ori[0])
         high = -1 if ori < .5 else 0
@@ -491,20 +494,20 @@ class Quadrup_env(gym.Env):
         # Reward for minimal contact force
         contact =(-1e-6)*((self.contact_force[0,:]**2).sum())
         
-        return [ align, high, surv, force,  contact]
+        return [ align, speed , high, surv, force,  contact]
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5)
-# obs, info = env.reset()
-# for _ in range(5000000):
-#     action = 2*np.random.random((env.action_space_))-1
-#     print(info)
-#     t.sleep(0.05)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     if truncated or terminated:
-#         obs, inf = env.reset()
-# env.close
+env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5)
+obs, info = env.reset()
+for _ in range(5000000):
+    action = 2*np.random.random((env.action_space_))-1
+    print(info)
+    t.sleep(0.05)
+    obs, reward, terminated, truncated, info = env.step(action)
+    if truncated or terminated:
+        obs, inf = env.reset()
+env.close()
 
 # # # ENV CHECK # # #
 # from stable_baselines3.common.env_checker import check_env
@@ -525,8 +528,8 @@ class Quadrup_env(gym.Env):
 # import time as t
 # import matplotlib.pyplot as plt
 # plt.ion()
-# r_name = ['align', 'high', 'surv', 'force',  'contact']
-# r_show = [[0 for i in range(240)] for i in range(len(r_name)+1)]
+# r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
+# r_show = [[0. for i in range(240)] for i in range(len(r_name)+1)]
 # env = Quadrup_env(render_mode = 'human',buffer_length=5,terrain_type=3,terrainHeight=[0,0.1],max_length=2000)
 # model = SAC.load('SAC_v3_2024-02-11-14-29-45_500k_gSDE',device='cpu',print_system_info=True)
 # # model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
@@ -540,10 +543,10 @@ class Quadrup_env(gym.Env):
     
 #     # # plotting
 #     # for i,name in enumerate(r_name):
-#     #     r_show[i].append(info[i])
+#     #     r_show[i].append(info[name])
 #     #     r_show[i].pop(0)
 #     #     plt.plot(r_show[i],label=name)
-#     # r_show[-1].append(np.sum(info))
+#     # r_show[-1].append(np.sum(list(info.values())))
 #     # r_show[-1].pop(0)
 #     # plt.plot(r_show[-1],label='sum')
 #     # plt.legend()
