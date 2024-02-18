@@ -486,7 +486,7 @@ class Quadrup_env(gym.Env):
         high = -1 if ori < .5 else 0
         
         # Reward for surviving 
-        surv = 1
+        surv = 0
         
         # Reward for minimal force
         force = (-5e-7)*((self.reaction_force[0,:]**2).sum())
