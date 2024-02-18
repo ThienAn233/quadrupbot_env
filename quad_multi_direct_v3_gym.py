@@ -72,7 +72,7 @@ class Quadrup_env(gym.Env):
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 2*self.pi
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
@@ -392,7 +392,7 @@ class Quadrup_env(gym.Env):
     
     def step(self,action,real_time = False):
         action *= np.pi/4
-        action = 0.2*action.reshape((1,-1))+0.8*self.get_run_gait(self.time_steps_in_current_episode[0])
+        action = 0.5*action.reshape((1,-1))+0.5*self.get_run_gait(self.time_steps_in_current_episode[0])
         filtered_action = self.previous_pos*.8 + action*.2
         self.previous_pos[0] = action
         self.time_steps_in_current_episode = [self.time_steps_in_current_episode[i]+1 for i in range(self.num_robot)]
@@ -449,9 +449,9 @@ class Quadrup_env(gym.Env):
     
     def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.4,swing=0.3):
         if side == 'l':
-            return np.hstack([ swing*np.ones_like(t),-mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+            return np.hstack([ swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
-            return np.hstack([-swing*np.ones_like(t),-mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+            return np.hstack([-swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
 
     
     def get_run_gait(self,t):
@@ -479,7 +479,7 @@ class Quadrup_env(gym.Env):
         align = self.cal_rew(base_pos=self.base_pos,target_pos=self.target_dir_world,client=client)
         
         # Reward for high speed in target velocity direction
-        speed = self.base_lin_vel[0][0]
+        speed = 0 #self.base_lin_vel[0][0]
         
         # Reward for termination
         ori = np.sum(self.base_ori[0][-1])/np.linalg.norm(self.base_ori[0])
@@ -498,7 +498,7 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5)
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrainHeight=[0,0])
 # obs, info = env.reset()
 # for _ in range(5000000):
 #     action = 2*np.random.random((env.action_space_))-1
