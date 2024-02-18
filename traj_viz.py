@@ -80,7 +80,7 @@ def get_run_gait(T,t,scheme):
 
 # Simulation loop
 time    = 0
-T       = 4*np.pi
+T       = 2*np.pi
 num_step= 10 
 scheme  = 2
 fixed   = False
