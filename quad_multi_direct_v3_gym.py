@@ -493,7 +493,7 @@ class Quadrup_env(gym.Env):
         
         # Reward for termination
         ori = np.sum(self.base_ori[0][-1])/np.linalg.norm(self.base_ori[0])
-        high = -1 if ori < .5 else 0
+        high = -1 if ori < .3 else 0
         
         # Reward for surviving 
         surv = 1
