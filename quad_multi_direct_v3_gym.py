@@ -20,7 +20,8 @@ class Quadrup_env(gym.Env):
         terrainHeight   = [0., 0.06],
         seed            = 0,
         buffer_length   = 5,
-        terrain_type        = None,
+        ray_test        =True,
+        terrain_type    = None,
     ):  
         super().__init__()
         # Configurable variables
@@ -53,6 +54,7 @@ class Quadrup_env(gym.Env):
         self.initialFriction    = [0.8, 1.5]
         self.terrainHeight      = terrainHeight
         self.buffer_length      = buffer_length
+        self.ray_test           = ray_test
         self.terrain_type       = terrain_type
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937
@@ -216,9 +218,9 @@ class Quadrup_env(gym.Env):
             zz = np.round(a*(np.sin(b*xx-np.pi/2)),1)*c
             self.zz_height[0] = -a*c
         if terrain_type == 3 :
-            a = 2 #np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
+            a = np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
             b = np.random.uniform(1.5,2)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
-            c = 0.06      # cao do bac thang
+            c = np.random.uniform(0.04,0.08)       # cao do bac thang
             zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy+np.pi*3/2)))
             self.zz_height[0] = -2*c*a+0.05
         print(f'a:{a}, b:{b}, c:{c}')
@@ -341,14 +343,22 @@ class Quadrup_env(gym.Env):
         # Target state
         target_info     = self.calculate_target(client)
         # Full observation
-        temp_obs_value += [
-                        *base_info,
-                        *joints_info,
-                        # *contact_info,
-                        *point_info,
-                        *previous_action,
-                        *target_info,
-                        ]
+        if self.ray_test:
+            temp_obs_value += [
+                            *base_info,
+                            *joints_info,
+                            # *contact_info,
+                            *point_info,
+                            *previous_action,
+                            *target_info,
+                            ]
+        else: 
+            temp_obs_value += [
+                            *base_info,
+                            *joints_info,
+                            *previous_action,
+                            *target_info,
+                            ]
         return temp_obs_value
     
     
@@ -392,7 +402,7 @@ class Quadrup_env(gym.Env):
     
     def step(self,action,real_time = False):
         action *= np.pi/4
-        action = 0.5*action.reshape((1,-1))+0.5*self.get_run_gait(self.time_steps_in_current_episode[0])
+        action = 0.2*action.reshape((1,-1))+0.8*self.get_run_gait(self.time_steps_in_current_episode[0])
         filtered_action = self.previous_pos*.8 + action*.2
         self.previous_pos[0] = action
         self.time_steps_in_current_episode = [self.time_steps_in_current_episode[i]+1 for i in range(self.num_robot)]
@@ -498,7 +508,7 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrainHeight=[0,0])
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=3,seed=1,terrainHeight=[0,0])
 # obs, info = env.reset()
 # for _ in range(5000000):
 #     action = 2*np.random.random((env.action_space_))-1
