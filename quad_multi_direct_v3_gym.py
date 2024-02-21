@@ -214,13 +214,13 @@ class Quadrup_env(gym.Env):
             zz = a*(np.cos(b*xx)+np.cos(c*yy)) + np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[0] = 2*a
         if terrain_type == 2 :
-            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), 0.4
+            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), 0.6
             zz = np.round(a*(np.sin(b*xx-np.pi/2)),1)*c
             self.zz_height[0] = -a*c
         if terrain_type == 3 :
             a = np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
             b = np.random.uniform(1.5,2)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
-            c = 0.04                            # cao do bac thang
+            c = 0.06                            # cao do bac thang
             zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy+np.pi*3/2)))
             self.zz_height[0] = -2*c*a+0.05
         print(f' type:{terrain_type} a:{a}, b:{b}, c:{c}')
