@@ -223,7 +223,7 @@ class Quadrup_env(gym.Env):
             c = 0.04                            # cao do bac thang
             zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy+np.pi*3/2)))
             self.zz_height[0] = -2*c*a+0.05
-        print(f'a:{a}, b:{b}, c:{c}')
+        print(f' type:{terrain_type} a:{a}, b:{b}, c:{c}')
         self.zz_maps[0] = zz
         heightfieldData = zz.flatten()
         if self.collision[0] == -1:
