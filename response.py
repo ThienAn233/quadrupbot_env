@@ -1,11 +1,11 @@
 import quad_multidirect_env as qa
 from stable_baselines3 import SAC
-from gym_env_wrapper import CustomEnv
+from quad_multi_direct_v3_gym import Quadrup_env
 import time as t
 import numpy as np
 from matplotlib import pyplot as plt
-env = CustomEnv(qa,render_mode = None ,terrainHeight   = [0. ,0.0],seed=2303)
-model = SAC.load('SAC_tryout_strict_new',device='cpu',print_system_info=True)
+env = Quadrup_env(max_length=300,render_mode=None,ray_test=False,terrain_type=0,terrainHeight=[0, 0.0])
+model = SAC.load('SAC_gym_2024-02-20-15-13-15',device='cpu',print_system_info=True)
 obs, info = env.reset()
 num_sample = 10
 batch_cosine = []
@@ -18,9 +18,9 @@ for i in range(num_sample):
     while True:
         action, _states = model.predict(obs, deterministic=True)
         obs, reward, terminated, truncated, info = env.step(action)
-        data_cosine += [env.env.target_dir_robot[0][0]/np.linalg.norm(env.env.target_dir_robot[0])]
-        data_angle += [np.arctan2(env.env.target_dir_robot[0][1],env.env.target_dir_robot[0][0])]
-        data_distance += [np.linalg.norm(env.env.target_dir_robot[0])]
+        data_cosine += [env.target_dir_robot[0][0]/np.linalg.norm(env.target_dir_robot[0])]
+        data_angle += [np.arctan2(env.target_dir_robot[0][1],env.target_dir_robot[0][0])]
+        data_distance += [np.linalg.norm(env.target_dir_robot[0])]
         if terminated or truncated:
             obs, info = env.reset()
             break
