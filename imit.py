@@ -1,5 +1,5 @@
 import numpy as np
-import argparse
+import tempfile
 
 import gymnasium as gym
 
@@ -11,9 +11,8 @@ from stable_baselines3 import SAC
 from imitation.policies.serialize import load_policy
 from imitation.data.wrappers import RolloutInfoWrapper
 from imitation.data import rollout
-from imitation.rewards.reward_nets import BasicRewardNet
-from imitation.util.networks import RunningNorm
-from imitation.algorithms.adversarial.gail import GAIL
+from imitation.algorithms import bc
+from imitation.algorithms.dagger import SimpleDAggerTrainer
 
 SEED = 42
 gym.register(
@@ -26,50 +25,36 @@ env     = DummyVecEnv([lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",te
                        lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",terrain_type=1,ray_test=False,buffer_length=5,seed=rng.integers(0,100)))),
                        lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",terrain_type=2,ray_test=False,buffer_length=5,seed=rng.integers(0,100)))),
                        lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",terrain_type=3,ray_test=False,buffer_length=5,seed=rng.integers(0,100))))])
+env_ref = DummyVecEnv([lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",terrain_type=0,ray_test=False,buffer_length=5,seed=rng.integers(0,100),reference=False))),
+                       lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",terrain_type=1,ray_test=False,buffer_length=5,seed=rng.integers(0,100),reference=False))),
+                       lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",terrain_type=2,ray_test=False,buffer_length=5,seed=rng.integers(0,100),reference=False))),
+                       lambda: RolloutInfoWrapper(Monitor(gym.make("multi-v3",terrain_type=3,ray_test=False,buffer_length=5,seed=rng.integers(0,100),reference=False)))])
 
 expert = load_policy(
     'sac',
-    path='SAC_gym_2024-02-20-15-13-15',
+    path='SAC_gym_2024-02-21-19-21-00',
     venv=env)
 
 reward, _ = evaluate_policy(expert, env, 4)
 print(f"Expert reward: {reward}")
 
-rollouts = rollout.rollout(
-    expert,
-    env,
-    rollout.make_sample_until(min_timesteps=None, min_episodes=5),
-    rng=rng)
-
-learner = SAC(
-    policy="MlpPolicy",
-    buffer_size=10,
-    batch_size=2048,
-    learning_rate= 3e-4,
-    env=env,
-    verbose=1,
-    seed=SEED)
-
-reward_before, _ = evaluate_policy(learner, env, 4)
-
-reward_net = BasicRewardNet(
+bc_trainer = bc.BC(
     observation_space=env.observation_space,
     action_space=env.action_space,
-    normalize_input_layer=RunningNorm)
+    batch_size=1024,
+    rng=rng)
 
-gail_trainer = GAIL(
-    demonstrations=rollouts,
-    demo_batch_size=1024,
-    gen_replay_buffer_capacity=512,
-    n_disc_updates_per_round=8,
-    venv=env,
-    gen_algo=learner,
-    reward_net=reward_net)
-
-# gail_trainer.train(100)
-
-reward_after, _ = evaluate_policy(learner, env, 4)
-print(f"Learner reward before training: {reward_before}")
-print(f"Learner reward after training: {reward_after}")
-
+with tempfile.TemporaryDirectory(prefix="dagger_example_") as tmpdir:
+    print(tmpdir)
+    dagger_trainer = SimpleDAggerTrainer(
+        venv=env_ref,
+        scratch_dir=tmpdir,
+        expert_policy=expert,
+        bc_trainer=bc_trainer,
+        rng=rng,
+    )
+    dagger_trainer.train(2000)
+reward, _ = evaluate_policy(dagger_trainer.policy, env, 20)
+dagger_trainer.policy.save('/try_BC')
+print(reward)
 print('done')

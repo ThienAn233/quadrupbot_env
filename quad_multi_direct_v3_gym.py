@@ -22,6 +22,7 @@ class Quadrup_env(gym.Env):
         buffer_length   = 5,
         ray_test        =True,
         terrain_type    = None,
+        reference       = True,
     ):  
         super().__init__()
         # Configurable variables
@@ -56,6 +57,7 @@ class Quadrup_env(gym.Env):
         self.buffer_length      = buffer_length
         self.ray_test           = ray_test
         self.terrain_type       = terrain_type
+        self.reference          = reference
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937
         self.jointId_list       = []
@@ -197,7 +199,7 @@ class Quadrup_env(gym.Env):
         numHeightfieldColumns = int(self.terrain_shape[1]/(self.terrainScale[1]))
 
         # Sample terrain num
-        if self.terrain_type:
+        if self.terrain_type is not None:
             terrain_type = self.terrain_type
         else:
             terrain_type = np.random.randint(0,4)
@@ -210,19 +212,19 @@ class Quadrup_env(gym.Env):
             zz = np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[0] = 0
         if terrain_type == 1 :
-            a, b, c = np.random.uniform(0.15,0.35), np.random.uniform(.3,.5), np.random.uniform(.3,.5)
+            a, b, c = np.random.uniform(0.15,0.35), np.random.uniform(.8,1.5), np.random.uniform(.8,1.5)
             zz = a*(np.cos(b*xx)+np.cos(c*yy)) + np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[0] = 2*a
         if terrain_type == 2 :
-            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), 0.6
+            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), 10*self.terrainHeight[-1]
             zz = np.round(a*(np.sin(b*xx-np.pi/2)),1)*c
             self.zz_height[0] = -a*c
         if terrain_type == 3 :
             a = np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
             b = np.random.uniform(1.5,2)        # cang lon thi ban kinh cang nho (ban kinh vong thang)
-            c = 0.06                            # cao do bac thang
+            c = self.terrainHeight[-1]          # cao do bac thang
             zz = c*np.round(a*(np.sin(b*xx+np.pi*3/2)+np.sin(b*yy+np.pi*3/2)))
-            self.zz_height[0] = -2*c*a+0.05
+            self.zz_height[0] = -2*c*a + self.terrainHeight[-1]
         print(f' type:{terrain_type} a:{a}, b:{b}, c:{c}')
         self.zz_maps[0] = zz
         heightfieldData = zz.flatten()
@@ -402,7 +404,10 @@ class Quadrup_env(gym.Env):
     
     def step(self,action,real_time = False):
         action *= np.pi/4
-        action = 0.2*action.reshape((1,-1))+0.8*self.get_run_gait(self.time_steps_in_current_episode[0])
+        if self.reference:
+            action = 0.2*action.reshape((1,-1))+0.8*self.get_run_gait(self.time_steps_in_current_episode[0])
+        else:
+            action = action.reshape((1,-1))
         filtered_action = self.previous_pos*.8 + action*.2
         self.previous_pos[0] = action
         self.time_steps_in_current_episode = [self.time_steps_in_current_episode[i]+1 for i in range(self.num_robot)]
@@ -539,13 +544,13 @@ class Quadrup_env(gym.Env):
 # plt.ion()
 # r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
 # r_show = [[0. for i in range(240)] for i in range(len(r_name)+1)]
-# env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=False,terrain_type=3,terrainHeight=[0,0.05],max_length=2000)
-# model = SAC.load('SAC_gym_2024-02-20-15-13-15',device='cpu',print_system_info=True)
+# env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=False,terrain_type=3,terrainHeight=[0,0.05],seed=2,max_length=2000,)
+# model = SAC.load('SAC_gym_2024-02-21-19-21-00',device='cpu',print_system_info=True)
 # # model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
 #     action, _states = model.predict(obs, deterministic=True)
-#     obs, reward, terminated, truncated, info = env.step(action,real_time=True)
+#     obs, reward, terminated, truncated, info = env.step(action,real_time=False)
 #     print(reward)
 #     if terminated or truncated:
 #         obs, info = env.reset()
