@@ -301,8 +301,8 @@ class Quadrup_env(gym.Env):
     
     def get_ray_test(self,client):
         temp_obs_value = []
-        base_pos = self.base_pos[client]
-        base_qua = self.base_qua[client]
+        base_pos = self.base_pos[0]
+        base_qua = self.base_qua[0]
         start_points    = np.vstack([self.x_v, self.y_v, -0.05 + np.zeros_like(self.x_v), np.zeros_like(self.x_v)])
         end_points    = np.vstack([self.x_v, self.y_v, -np.ones_like(self.x_v), np.zeros_like(self.x_v)])
         start_norm, end_norm = np.linalg.norm(start_points), np.linalg.norm(end_points)
@@ -313,7 +313,7 @@ class Quadrup_env(gym.Env):
         for info in p.rayTestBatch(start,end,numThreads=0,physicsClientId =client):
             ray_contact += [info[3]]
             ray_tio     += [info[2]]
-        self.ray_start_end[client] = [np.array(ray_contact),np.array(ray_tio)]
+        self.ray_start_end[0] = [np.array(ray_contact),np.array(ray_tio)]
         temp_obs_value += [*ray_tio]
         return temp_obs_value
         
