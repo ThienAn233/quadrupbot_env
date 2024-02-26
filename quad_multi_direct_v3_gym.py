@@ -48,8 +48,8 @@ class Quadrup_env(gym.Env):
         self.robot_file         = robot_file
         self.target_file        = target_file
         self.num_robot          = num_robot 
-        self.num_ray            = 30
-        self.radius             = 0.4
+        self.num_ray            = 8
+        self.radius             = 0.5
         self.initialVel         = [0, .2]
         self.initialMass        = [0, 1.]
         self.initialPos         = [0, .3]
@@ -81,8 +81,12 @@ class Quadrup_env(gym.Env):
         self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
-        w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
-        x_v, y_v            = self.radius*np.cos(w_n), self.radius*np.sin(w_n)
+        # w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
+        # x_v, y_v            = self.radius*np.cos(w_n), self.radius*np.sin(w_n)
+        # self.x_v, self.y_v  = x_v.flatten(), y_v.flatten()
+        x_n                 = np.linspace(-self.radius,self.radius,self.num_ray)
+        y_n                 = np.linspace(-self.radius,self.radius,self.num_ray) 
+        x_v, y_v            = np.meshgrid(x_n,y_n)
         self.x_v, self.y_v  = x_v.flatten(), y_v.flatten()
         self.terrain_shape  = [22, 22]
         self.feet_list      = [2,5,8,11]
