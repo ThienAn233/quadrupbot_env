@@ -48,8 +48,8 @@ class Quadrup_env(gym.Env):
         self.robot_file         = robot_file
         self.target_file        = target_file
         self.num_robot          = num_robot 
-        self.num_ray            = 8
-        self.radius             = 0.05
+        self.num_ray            = 30
+        self.radius             = 0.4
         self.initialVel         = [0, .2]
         self.initialMass        = [0, 1.]
         self.initialPos         = [0, .3]
@@ -284,17 +284,36 @@ class Quadrup_env(gym.Env):
         return temp_obs_value     
     
     
+    # def get_ray_test(self,client):
+    #     temp_obs_value = []
+    #     start_points    = np.stack([self.x_v, self.y_v, - 0.1 - np.zeros_like(self.x_v)],axis=1)
+    #     end_points    = np.stack([self.x_v, self.y_v, - 0.2 - np.ones_like(self.x_v)],axis=1)
+    #     ray_contact = []
+    #     ray_tio     = []
+    #     for feetId in self.feet_list:
+    #         for info in p.rayTestBatch(start_points,end_points,parentObjectUniqueId=self.robotId,parentLinkIndex=feetId,numThreads=0,physicsClientId =client):
+    #             ray_contact += [info[3]]
+    #             ray_tio     += [info[2]]
+    #     self.ray_start_end[0] = [np.array(ray_contact),np.array(ray_tio)]
+    #     temp_obs_value += [*ray_tio]
+    #     return temp_obs_value
+    
+    
     def get_ray_test(self,client):
         temp_obs_value = []
-        start_points    = np.stack([self.x_v, self.y_v, - 0.1 - np.zeros_like(self.x_v)],axis=1)
-        end_points    = np.stack([self.x_v, self.y_v, - 0.2 - np.ones_like(self.x_v)],axis=1)
+        base_pos = self.base_pos[client]
+        base_qua = self.base_qua[client]
+        start_points    = np.vstack([self.x_v, self.y_v, -0.05 + np.zeros_like(self.x_v), np.zeros_like(self.x_v)])
+        end_points    = np.vstack([self.x_v, self.y_v, -np.ones_like(self.x_v), np.zeros_like(self.x_v)])
+        start_norm, end_norm = np.linalg.norm(start_points), np.linalg.norm(end_points)
+        start   = (utils.passive_rotation(base_qua,start_points)[:3,:]*start_norm+base_pos.reshape((-1,1))).T
+        end     = (utils.passive_rotation(base_qua,end_points)[:3,:]*end_norm+base_pos.reshape((-1,1))).T
         ray_contact = []
         ray_tio     = []
-        for feetId in self.feet_list:
-            for info in p.rayTestBatch(start_points,end_points,parentObjectUniqueId=self.robotId,parentLinkIndex=feetId,numThreads=0,physicsClientId =client):
-                ray_contact += [info[3]]
-                ray_tio     += [info[2]]
-        self.ray_start_end[0] = [np.array(ray_contact),np.array(ray_tio)]
+        for info in p.rayTestBatch(start,end,numThreads=0,physicsClientId =client):
+            ray_contact += [info[3]]
+            ray_tio     += [info[2]]
+        self.ray_start_end[client] = [np.array(ray_contact),np.array(ray_tio)]
         temp_obs_value += [*ray_tio]
         return temp_obs_value
         
@@ -516,16 +535,16 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=3,seed=1,terrainHeight=[0,0])
-# obs, info = env.reset()
-# for _ in range(5000000):
-#     action = 2*np.random.random((env.action_space_))-1
-#     print(info)
-#     t.sleep(0.05)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     if truncated or terminated:
-#         obs, inf = env.reset()
-# env.close()
+env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=3,seed=1,terrainHeight=[0,0.04],ray_test=True,debug=True)
+obs, info = env.reset()
+for _ in range(5000000):
+    action = 2*np.random.random((env.action_space_))-1
+    print(info)
+    t.sleep(0.05)
+    obs, reward, terminated, truncated, info = env.step(action)
+    if truncated or terminated:
+        obs, inf = env.reset()
+env.close()
 
 # # # ENV CHECK # # #
 # from stable_baselines3.common.env_checker import check_env
