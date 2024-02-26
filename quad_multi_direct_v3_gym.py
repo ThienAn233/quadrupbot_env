@@ -23,6 +23,7 @@ class Quadrup_env(gym.Env):
         ray_test        =True,
         terrain_type    = None,
         reference       = True,
+        noise           = 0.05,
     ):  
         super().__init__()
         # Configurable variables
@@ -58,6 +59,7 @@ class Quadrup_env(gym.Env):
         self.ray_test           = ray_test
         self.terrain_type       = terrain_type
         self.reference          = reference
+        self.noise              = noise
         self.terrainScale       = [.05, .05, 1]
         self.initialHeight      = .2937
         self.jointId_list       = []
@@ -476,7 +478,8 @@ class Quadrup_env(gym.Env):
         act3    = self.leg_traj(t+self.T/2,'l')
         act4    = self.leg_traj(t,'r')
         action  = np.hstack([act1,act2,act3,act4])
-        return action
+        noise = np.random.normal(0,self.noise,action.shape)
+        return action+noise
     
     
     def cal_rew(self,base_pos,target_pos,client):
