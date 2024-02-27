@@ -430,7 +430,7 @@ class Quadrup_env(gym.Env):
     def step(self,action,real_time = False):
         action *= np.pi/4
         if self.reference:
-            action = 0.2*action.reshape((1,-1))+0.8*self.get_run_gait(self.time_steps_in_current_episode[0])
+            action = .5*action.reshape((1,-1))+.5*self.get_run_gait(self.time_steps_in_current_episode[0])
         else:
             action = action.reshape((1,-1))
         filtered_action = self.previous_pos*.8 + action*.2
@@ -539,7 +539,7 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=3,seed=1,terrainHeight=[0,0.04],ray_test=True,debug=True)
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=3,seed=1,terrainHeight=[0,0.08],ray_test=True,debug=True)
 # obs, info = env.reset()
 # for _ in range(5000000):
 #     action = 2*np.random.random((env.action_space_))-1
