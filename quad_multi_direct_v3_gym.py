@@ -527,7 +527,7 @@ class Quadrup_env(gym.Env):
         high = -1 if ori < .3 else 0
         
         # Reward for surviving 
-        surv = 1
+        surv = 0
         
         # Reward for minimal force
         force = (-5e-7)*((self.reaction_force[0,:]**2).sum())
@@ -570,8 +570,8 @@ class Quadrup_env(gym.Env):
 # plt.ion()
 # r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
 # r_show = [[0. for i in range(240)] for i in range(len(r_name)+1)]
-# env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=False,terrain_type=3,terrainHeight=[0,0.05],seed=2,max_length=2000,)
-# model = SAC.load('SAC_gym_2024-02-21-19-21-00',device='cpu',print_system_info=True)
+# env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=True,noise =0,terrain_type=1,terrainHeight=[0,0.08],seed=2,max_length=2000,)
+# model = SAC.load('SAC_gym_2024-02-27-06-37-58',device='cpu',print_system_info=True)
 # # model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
