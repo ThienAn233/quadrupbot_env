@@ -61,7 +61,7 @@ class Quadrup_env(gym.Env):
         self.reference          = reference
         self.noise              = noise
         self.terrainScale       = [.05, .05, 1]
-        self.initialHeight      = .2937
+        self.initialHeight      = .17
         self.jointId_list       = []
         self.jointName_list     = []
         self.jointRange_list    = []
@@ -504,8 +504,8 @@ class Quadrup_env(gym.Env):
         t       = np.array(t).reshape((-1,1))
         act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/2
         act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/2
-        act3    = self.leg_traj(t+self.T/2,'l',scheme=1)+np.array([0,-0.785,0.785])/2
-        act4    = self.leg_traj(t,'r',scheme=1)+np.array([0,-0.785,0.785])/2
+        act3    = self.leg_traj(t+self.T/2,'l',scheme=0)+np.array([0,-0.785,0.785])/2
+        act4    = self.leg_traj(t,'r',scheme=0)+np.array([0,-0.785,0.785])/2
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
         return action+noise
