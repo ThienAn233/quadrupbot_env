@@ -496,9 +496,9 @@ class Quadrup_env(gym.Env):
                 return np.hstack([-swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if scheme == 1:
             if side == 'l':
-                return np.hstack([ swing*np.ones_like(t), -mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
+                return np.hstack([ swing*np.ones_like(t), -mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
             else:
-                return np.hstack([-swing*np.ones_like(t), -mag_thigh*np.cos(2*np.pi*t/T), mag_bicep*np.cos(2*np.pi*t/T)])
+                return np.hstack([-swing*np.ones_like(t), -mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
     
     def get_run_gait(self,t):
         t       = np.array(t).reshape((-1,1))
