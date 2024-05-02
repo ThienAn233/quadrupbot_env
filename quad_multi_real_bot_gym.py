@@ -14,7 +14,7 @@ class Quadrup_env(gym.Env):
         num_step        = 10,
         render_mode     = None,
         debug           = False,
-        robot_file      = 'quadrupbot_env//quadrup.urdf',
+        robot_file      = 'quadrupbot_env//NCKH_AN_and_NHAN//urdf//NCKH_AN_and_NHAN.urdf',
         target_file     = 'quadrupbot_env//target.urdf',
         num_robot       = 1,
         terrainHeight   = [0., 0.06],
