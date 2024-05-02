@@ -1,0 +1,735 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="NCKH_AN_and_NHAN">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-2.06930624298254E-05 0.0314717667121343 -7.1652482863914E-05"
+        rpy="-1.570796 3.141593 0" />
+      <mass
+        value="0.466823121650161" />
+      <inertia
+        ixx="0.00031602679934993"
+        ixy="9.49707580620035E-09"
+        ixz="-1.57354450694799E-10"
+        iyy="0.000666280699222349"
+        iyz="-1.95989888879497E-21"
+        izz="0.000429277643250015" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="yellow">
+        <color
+          rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel1">
+    <inertial>
+      <origin
+        xyz="0.0376546399921932 2.95915550945838E-05 0.00695809139390947"
+        rpy="0 0 0" />
+      <mass
+        value="0.0485512367202346" />
+      <inertia
+        ixx="8.94595002943724E-06"
+        ixy="5.5386583024537E-10"
+        ixz="1.3023102901899E-07"
+        iyy="1.85801782098987E-05"
+        iyz="-1.68966995950272E-08"
+        izz="1.4607199563483E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel1.STL" />
+      </geometry>
+      <material
+        name="black">
+        <color
+          rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel1.1">
+    <inertial>
+      <origin
+        xyz="0.0326167772045229 -0.0409063788365546 0.00326118693431166"
+        rpy="0 0 0" />
+      <mass
+        value="0.0586013806261611" />
+      <inertia
+        ixx="2.42073104193029E-05"
+        ixy="1.2484076562072E-05"
+        ixz="-1.31000464940237E-06"
+        iyy="1.74922513973027E-05"
+        iyz="1.53621522135486E-06"
+        izz="3.25882087154268E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel1.1.STL" />
+      </geometry>
+      <material
+        name="yellow">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel1.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel1.2">
+    <inertial>
+      <origin
+        xyz="-0.0256323732966148 -0.0336676766551409 -0.00674833913750822"
+        rpy="0 0 0" />
+      <mass
+        value="0.0244253480243519" />
+      <inertia
+        ixx="2.14587507838223E-05"
+        ixy="-1.39714823081407E-05"
+        ixz="1.07320268759818E-08"
+        iyy="1.13439089219117E-05"
+        iyz="6.09957033675581E-08"
+        izz="3.25317818276034E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel1.2.STL" />
+      </geometry>
+      <material
+        name="black">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel1.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel2">
+    <inertial>
+      <origin
+        xyz="-0.0377509355922704 0.000154458556637992 0.00695643953776238"
+        rpy="0 0 0" />
+      <mass
+        value="0.0485512367210368" />
+      <inertia
+        ixx="8.94595002825872E-06"
+        ixy="-4.40959895425951E-09"
+        ixz="-1.98598491017381E-07"
+        iyy="1.86198269215805E-05"
+        iyz="-8.81744174576194E-08"
+        izz="1.46506201499069E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel2.STL" />
+      </geometry>
+      <material
+        name="black">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel2.1">
+    <inertial>
+      <origin
+        xyz="0.0405617265917802 -0.0331892618811079 0.00385223908064193"
+        rpy="0 0 0" />
+      <mass
+        value="0.0584560819715106" />
+      <inertia
+        ixx="1.87591480437266E-05"
+        ixy="1.26982610846214E-05"
+        ixz="-1.81524325395658E-06"
+        iyy="2.28852682585367E-05"
+        iyz="1.38665370525832E-06"
+        izz="3.24529801909875E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel2.1.STL" />
+      </geometry>
+      <material
+        name="yellow">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel2.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel2.2">
+    <inertial>
+      <origin
+        xyz="-0.0298704640605857 -0.0299766235167066 -0.00422347846447647"
+        rpy="0 0 0" />
+      <mass
+        value="0.0244512661636109" />
+      <inertia
+        ixx="1.75981230081107E-05"
+        ixy="-1.48344361637171E-05"
+        ixz="2.74368453439243E-07"
+        iyy="1.52618120725948E-05"
+        iyz="3.59361354474809E-07"
+        izz="3.25737862138548E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel2.2.STL" />
+      </geometry>
+      <material
+        name="black">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel2.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel3">
+    <inertial>
+      <origin
+        xyz="0.0376546399932008 -0.000194069662087827 -0.00695544717455106"
+        rpy="0 0 0" />
+      <mass
+        value="0.0485512367213061" />
+      <inertia
+        ixx="8.9459500278715E-06"
+        ixy="-3.63231987734262E-09"
+        ixz="-1.30181542689937E-07"
+        iyy="1.85771593477179E-05"
+        iyz="-1.10771177579481E-07"
+        izz="1.46102184243876E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel3.STL" />
+      </geometry>
+      <material
+        name="black">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel3.1">
+    <inertial>
+      <origin
+        xyz="0.0409085324203588 -0.032546684342734 -0.00216566306140553"
+        rpy="0 0 0" />
+      <mass
+        value="0.0587113268232687" />
+      <inertia
+        ixx="1.84154062019393E-05"
+        ixy="1.27656756591413E-05"
+        ixz="1.19671034086375E-06"
+        iyy="2.32780108507993E-05"
+        iyz="-8.86941989619872E-07"
+        izz="3.27261926629517E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel3.1.STL" />
+      </geometry>
+      <material
+        name="yellow">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel3.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel3.2">
+    <inertial>
+      <origin
+        xyz="-0.0299207598961442 -0.0296771809990849 0.00571781481646289"
+        rpy="0 0 0" />
+      <mass
+        value="0.0244512661586145" />
+      <inertia
+        ixx="1.75481181214615E-05"
+        ixy="-1.48334275113458E-05"
+        ixz="4.68940533968834E-07"
+        iyy="1.53192365452258E-05"
+        iyz="5.067406505001E-07"
+        izz="3.25663666788307E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel3.2.STL" />
+      </geometry>
+      <material
+        name="black">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel3.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel4">
+    <inertial>
+      <origin
+        xyz="-0.0373348708831581 -0.000314126486332954 -0.00677907103186814"
+        rpy="0 0 0" />
+      <mass
+        value="0.0482153982657156" />
+      <inertia
+        ixx="8.92090516184435E-06"
+        ixy="8.2305889635407E-09"
+        ixz="1.77622250097246E-07"
+        iyy="1.84831778051894E-05"
+        iyz="-1.84417470580417E-07"
+        izz="1.45118643751175E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel4.STL" />
+      </geometry>
+      <material
+        name="black">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel4.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel4.1">
+    <inertial>
+      <origin
+        xyz="0.0442410602374218 -0.0278752579218581 -0.00178420133232522"
+        rpy="0 0 0" />
+      <mass
+        value="0.0587113266853458" />
+      <inertia
+        ixx="1.56844836492885E-05"
+        ixy="1.19427860432043E-05"
+        ixz="1.11795365787776E-06"
+        iyy="2.59901182518855E-05"
+        iyz="-6.61230339548773E-07"
+        izz="3.27450086684504E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel4.1.STL" />
+      </geometry>
+      <material
+        name="yellow">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel4.1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="wheel4.2">
+    <inertial>
+      <origin
+        xyz="-0.0319285525953966 -0.0274091773325302 0.00616318740578134"
+        rpy="0 0 0" />
+      <mass
+        value="0.0244512661578749" />
+      <inertia
+        ixx="1.54715718726678E-05"
+        ixy="-1.48338848949562E-05"
+        ixz="7.44084947687132E-07"
+        iyy="1.74154716857695E-05"
+        iyz="7.23944229842359E-07"
+        izz="3.254667778828E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel4.2.STL" />
+      </geometry>
+      <material
+        name="black">
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://NCKH_AN_and_NHAN/meshes/wheel4.2.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+
+
+  <joint
+    name="wl1.joint1"
+    type="revolute">
+    <origin
+      xyz="-0.15399999986887 0.0196 0.045"
+      rpy="0 0 0.09" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel1" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl1.joint2"
+    type="revolute">
+    <origin
+      xyz="0.0259999998688681 0.0002058349694006 0.0483995623117133"
+      rpy="0 0 0" />
+    <parent
+      link="wheel1" />
+    <child
+      link="wheel1.1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl1.joint3"
+    type="revolute">
+    <origin
+      xyz="0.0513027822613403 -0.0682732325273144 -0.0121097578836928"
+      rpy="0 0 -0.18" />
+    <parent
+      link="wheel1.1" />
+    <child
+      link="wheel1.2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl3.joint1"
+    type="revolute">
+    <origin
+      xyz="-0.15399999986887 0.01959999990896 -0.0450000002203523"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel3" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl3.joint2"
+    type="revolute">
+    <origin
+      xyz="0.0259999998688687 -0.00134992343998969 -0.0483811707706477"
+      rpy="0 0 0" />
+    <parent
+      link="wheel3" />
+    <child
+      link="wheel3.1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl3.joint3"
+    type="revolute">
+    <origin
+      xyz="0.0653334723731154 -0.0545099891517235 0.0159265330137419"
+      rpy="0 0 0" />
+    <parent
+      link="wheel3.1" />
+    <child
+      link="wheel3.2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl2.joint1"
+    type="revolute">
+    <origin
+      xyz="0.15399999986887 0.01959999990896 0.0450000002203523"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel2" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl2.joint2"
+    type="revolute">
+    <origin
+      xyz="-0.0463999998688697 0.00107439275227523 0.0483880735211137"
+      rpy="0 0 0" />
+    <parent
+      link="wheel2" />
+    <child
+      link="wheel2.1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl2.joint3"
+    type="revolute">
+    <origin
+      xyz="0.064448995695807 -0.0562739157375935 -0.0131540619143678"
+      rpy="0 0 0" />
+    <parent
+      link="wheel2.1" />
+    <child
+      link="wheel2.2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl4.joint1"
+    type="revolute">
+    <origin
+      xyz="0.1537 0.0196000000000055 -0.0449999999999976"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="wheel4" />
+    <axis
+      xyz="-1 0 0" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl4.joint2"
+    type="revolute">
+    <origin
+      xyz="-0.046099999999999 -0.0022403402675502 -0.048348121736899"
+      rpy="0 0 0" />
+    <parent
+      link="wheel4" />
+    <child
+      link="wheel4.1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+
+  <joint
+    name="wl4.joint3"
+    type="revolute">
+    <origin
+      xyz="0.0709944461556998 -0.0466734208745271 0.016578189915763"
+      rpy="0 0 0" />
+    <parent
+      link="wheel4.1" />
+    <child
+      link="wheel4.2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.571"
+      upper="1.571"
+      effort="0.9" 
+      velocity="2"/>
+  </joint>
+</robot>
