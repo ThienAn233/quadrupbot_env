@@ -520,7 +520,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -539,7 +539,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -558,7 +558,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -577,7 +577,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -596,7 +596,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -615,7 +615,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -634,7 +634,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -653,7 +653,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -672,7 +672,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -691,7 +691,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -710,7 +710,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 
@@ -729,7 +729,7 @@
     <limit
       lower="-1.571"
       upper="1.571"
-      effort="0.9" 
+      effort="2" 
       velocity="2"/>
   </joint>
 </robot>
