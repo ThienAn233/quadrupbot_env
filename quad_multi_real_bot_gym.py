@@ -488,7 +488,7 @@ class Quadrup_env(gym.Env):
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.4,swing=0.5):
+    def leg_traj(self,t,side,mag_thigh = 0.5,mag_bicep=0.5,swing=0.5):
         if side == 'l':
             return np.hstack([ swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
@@ -499,8 +499,8 @@ class Quadrup_env(gym.Env):
         t       = np.array(t).reshape((-1,1))
         act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/4
         act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/4
-        act3    = self.leg_traj(t+self.T/2,'l',mag_thigh=0.3)+np.array([0,-0.785/2,0.785])/2
-        act4    = self.leg_traj(t,'r',mag_thigh=0.3)+np.array([0,-0.785/2,0.785])/2
+        act3    = self.leg_traj(t+self.T/2,'l')+np.array([0,-0.785/2,0.785])/2
+        act4    = self.leg_traj(t,'r')+np.array([0,-0.785/2,0.785])/2
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
         return action+noise
@@ -562,7 +562,7 @@ class Quadrup_env(gym.Env):
 # from stable_baselines3 import SAC
 # # # # Instantiate the env
 # # # # Define and Train the agent
-# env = Quadrup_env(buffer_length=5,terrain_type=3,terrainHeight=[0,0.05],max_length=500)
+# env = Quadrup_env(buffer_length=5,terrain_type=1,terrainHeight=[0,0.05],max_length=500)
 # model = SAC(policy="MlpPolicy",batch_size=500,learning_rate=1e-4,env=env,verbose=True,)
 # model.learn(2500)
 # model.save('SAC_tryout')
