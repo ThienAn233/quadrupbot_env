@@ -488,7 +488,7 @@ class Quadrup_env(gym.Env):
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.4,swing=0.4):
+    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.4,swing=0.5):
         if side == 'l':
             return np.hstack([ swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
@@ -559,37 +559,37 @@ class Quadrup_env(gym.Env):
 # print('checked, no error!')
 
 # # # TRAIN CHECK # # #
-from stable_baselines3 import SAC
-# # # Instantiate the env
-# # # Define and Train the agent
-env = Quadrup_env(buffer_length=5,terrain_type=3,terrainHeight=[0,0.1],max_length=500)
-model = SAC(policy="MlpPolicy",batch_size=2048,learning_rate=1e-4,env=env,verbose=1)
-model.learn(300000)
-model.save('SAC_tryout')
-import time as t
-import matplotlib.pyplot as plt
-plt.ion()
-r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
-r_show = [[0. for i in range(240)] for i in range(len(r_name)+1)]
-env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=False,noise =0,terrain_type=0,terrainHeight=[0,0.05],seed=2,max_length=2000,)
-model = SAC.load('SAC_real_gym_2024-05-02-21-36-02.zip',device='cpu',print_system_info=True)
-# model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
-obs, info = env.reset()
-while True:
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, terminated, truncated, info = env.step(action,real_time=False)
-    print(reward)
-    if terminated or truncated:
-        obs, info = env.reset()
+# from stable_baselines3 import SAC
+# # # # Instantiate the env
+# # # # Define and Train the agent
+# env = Quadrup_env(buffer_length=5,terrain_type=3,terrainHeight=[0,0.05],max_length=500)
+# model = SAC(policy="MlpPolicy",batch_size=500,learning_rate=1e-4,env=env,verbose=True,)
+# model.learn(2500)
+# model.save('SAC_tryout')
+# import time as t
+# import matplotlib.pyplot as plt
+# plt.ion()
+# r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
+# r_show = [[0. for i in range(240)] for i in range(len(r_name)+1)]
+# env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=False,noise =0,terrain_type=0,terrainHeight=[0,0.05],seed=2,max_length=2000,)
+# model = SAC.load('SAC_real_gym_2024-05-02-21-36-02.zip',device='cpu',print_system_info=True)
+# # model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
+# obs, info = env.reset()
+# while True:
+#     action, _states = model.predict(obs, deterministic=True)
+#     obs, reward, terminated, truncated, info = env.step(action,real_time=False)
+#     print(reward)
+#     if terminated or truncated:
+#         obs, info = env.reset()
     
-    # # # plotting
-    # for i,name in enumerate(r_name):
-    #     r_show[i].append(info[name])
-    #     r_show[i].pop(0)
-    #     plt.plot(r_show[i],label=name)
-    # r_show[-1].append(reward)
-    # r_show[-1].pop(0)
-    # plt.plot(r_show[-1],label='sum')
-    # plt.legend()
-    # plt.pause(1e-12)
-    # plt.clf()
+#     # # # plotting
+#     # for i,name in enumerate(r_name):
+#     #     r_show[i].append(info[name])
+#     #     r_show[i].pop(0)
+#     #     plt.plot(r_show[i],label=name)
+#     # r_show[-1].append(reward)
+#     # r_show[-1].pop(0)
+#     # plt.plot(r_show[-1],label='sum')
+#     # plt.legend()
+#     # plt.pause(1e-12)
+#     # plt.clf()
