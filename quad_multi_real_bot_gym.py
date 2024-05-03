@@ -51,7 +51,7 @@ class Quadrup_env(gym.Env):
         self.num_ray            = 8
         self.radius             = 0.5
         self.initialVel         = [0, .2]
-        self.initialMass        = [0, 1.]
+        self.initialMass        = [0, .5]
         self.initialPos         = [0, .3]
         self.initialFriction    = [0.8, 1.5]
         self.terrainHeight      = terrainHeight
@@ -497,10 +497,10 @@ class Quadrup_env(gym.Env):
     
     def get_run_gait(self,t):
         t       = np.array(t).reshape((-1,1))
-        act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/2
-        act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/2
-        act3    = self.leg_traj(t+self.T/2,'l',mag_thigh=0.4)+np.array([0,-0.785/2,0.785])
-        act4    = self.leg_traj(t,'r',mag_thigh=0.4)+np.array([0,-0.785/2,0.785])
+        act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/4
+        act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/4
+        act3    = self.leg_traj(t+self.T/2,'l',mag_thigh=0.3)+np.array([0,-0.785/2,0.785])/2
+        act4    = self.leg_traj(t,'r',mag_thigh=0.3)+np.array([0,-0.785/2,0.785])/2
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
         return action+noise
