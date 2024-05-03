@@ -488,24 +488,19 @@ class Quadrup_env(gym.Env):
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.4,swing=0.3,scheme=0):
-        if scheme == 0:
-            if side == 'l':
-                return np.hstack([ swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
-            if side == 'r':
-                return np.hstack([-swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
-        if scheme == 1:
-            if side == 'l':
-                return np.hstack([ swing*np.ones_like(t), -mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
-            else:
-                return np.hstack([-swing*np.ones_like(t), -mag_thigh*np.cos(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.4,swing=0.4):
+        if side == 'l':
+            return np.hstack([ swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+        if side == 'r':
+            return np.hstack([-swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
+            
     
     def get_run_gait(self,t):
         t       = np.array(t).reshape((-1,1))
-        act1    = self.leg_traj(t,'l')-np.array([0,-0.785,0.785])/8
-        act2    = self.leg_traj(t+self.T/2,'r')-np.array([0,-0.785,0.785])/8
-        act3    = self.leg_traj(t+self.T/2,'l',scheme=0)+np.array([0,-0.785,0.785])
-        act4    = self.leg_traj(t,'r',scheme=0)+np.array([0,-0.785,0.785])
+        act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/2
+        act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/2
+        act3    = self.leg_traj(t+self.T/2,'l',mag_thigh=0.4)+np.array([0,-0.785/2,0.785])
+        act4    = self.leg_traj(t,'r',mag_thigh=0.4)+np.array([0,-0.785/2,0.785])
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
         return action+noise
@@ -545,7 +540,7 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=0,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=3,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
 # obs, info = env.reset()
 # for _ in range(5000000):
 #     action = 0.02*np.random.random((env.action_space_))-0.01
