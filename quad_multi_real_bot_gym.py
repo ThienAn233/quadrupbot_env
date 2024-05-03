@@ -502,10 +502,10 @@ class Quadrup_env(gym.Env):
     
     def get_run_gait(self,t):
         t       = np.array(t).reshape((-1,1))
-        act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/2
-        act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/2
-        act3    = self.leg_traj(t+self.T/2,'l',scheme=0)+np.array([0,-0.785,0.785])/2
-        act4    = self.leg_traj(t,'r',scheme=0)+np.array([0,-0.785,0.785])/2
+        act1    = self.leg_traj(t,'l')-np.array([0,-0.785,0.785])/8
+        act2    = self.leg_traj(t+self.T/2,'r')-np.array([0,-0.785,0.785])/8
+        act3    = self.leg_traj(t+self.T/2,'l',scheme=0)+np.array([0,-0.785,0.785])
+        act4    = self.leg_traj(t,'r',scheme=0)+np.array([0,-0.785,0.785])
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
         return action+noise
@@ -545,10 +545,10 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=3,seed=1,terrainHeight=[0,0.08],ray_test=True,debug=True)
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=5,terrain_type=0,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
 # obs, info = env.reset()
 # for _ in range(5000000):
-#     action = 2*np.random.random((env.action_space_))-1
+#     action = 0.02*np.random.random((env.action_space_))-0.01
 #     print(info)
 #     t.sleep(0.05)
 #     obs, reward, terminated, truncated, info = env.step(action)
@@ -577,7 +577,7 @@ class Quadrup_env(gym.Env):
 # r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
 # r_show = [[0. for i in range(240)] for i in range(len(r_name)+1)]
 # env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=False,noise =0,terrain_type=0,terrainHeight=[0,0.05],seed=2,max_length=2000,)
-# model = SAC.load('SAC_gym_2024-02-27-11-23-48',device='cpu',print_system_info=True)
+# model = SAC.load('SAC_real_gym_2024-05-02-21-36-02.zip',device='cpu',print_system_info=True)
 # # model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
