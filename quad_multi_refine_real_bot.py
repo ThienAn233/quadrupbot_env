@@ -11,7 +11,7 @@ class Quadrup_env(gym.Env):
     def __init__(
         self,
         max_length      = 500,
-        num_step        = 40,
+        num_step        = 48,
         render_mode     = None,
         debug           = False,
         robot_file      = 'quadrupbot_env//NCKH_AN_and_NHAN//urdf//NCKH_AN_and_NHAN.urdf',
@@ -78,7 +78,7 @@ class Quadrup_env(gym.Env):
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 6*self.pi
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         # w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
@@ -431,10 +431,10 @@ class Quadrup_env(gym.Env):
     def step(self,action,real_time = False):
         action *= np.pi/4
         if self.reference:
-            action = .5*action.reshape((1,-1))+.5*self.get_run_gait(self.time_steps_in_current_episode[0])
+            action = .3*action.reshape((1,-1))+.7*self.get_run_gait(self.time_steps_in_current_episode[0])
         else:
             action = action.reshape((1,-1))
-        filtered_action = self.previous_pos*.8 + action*.2
+        filtered_action = self.previous_pos*.5 + action*.5
         self.previous_pos[0] = action
         self.time_steps_in_current_episode = [self.time_steps_in_current_episode[i]+1 for i in range(self.num_robot)]
         for _ in range(self.num_step):
@@ -488,7 +488,7 @@ class Quadrup_env(gym.Env):
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.5,mag_bicep=0.5,swing=0.5):
+    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.8,swing=0.3):
         if side == 'l':
             return np.hstack([ swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
@@ -499,8 +499,8 @@ class Quadrup_env(gym.Env):
         t       = np.array(t).reshape((-1,1))
         act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/4
         act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/4
-        act3    = self.leg_traj(t+self.T/2,'l')+np.array([0,-0.785/2,0.785])/2
-        act4    = self.leg_traj(t,'r')+np.array([0,-0.785/2,0.785])/2
+        act3    = self.leg_traj(t+self.T/2,'l')+np.array([0,-0.785/2,0.785])/4
+        act4    = self.leg_traj(t,'r')+np.array([0,-0.785/2,0.785])/4
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
         return action+noise
@@ -531,10 +531,10 @@ class Quadrup_env(gym.Env):
         surv = 1
         
         # Reward for minimal force
-        force = (-5e-7)*((self.reaction_force[0,:]**2).sum())
+        force = (-5e-6)*((self.reaction_force[0,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-6)*((self.contact_force[0,:]**2).sum())
+        contact =(-1e-5)*((self.contact_force[0,:]**2).sum())
         
         return [ align, speed , high, surv, force,  contact]
     
@@ -562,9 +562,9 @@ class Quadrup_env(gym.Env):
 # from stable_baselines3 import SAC
 # # # # # Instantiate the env
 # # # # # Define and Train the agent
-# # env = Quadrup_env(buffer_length=5,terrain_type=1,terrainHeight=[0,0.05],max_length=500)
-# # model = SAC(policy="MlpPolicy",batch_size=500,learning_rate=1e-4,env=env,verbose=True,)
-# # model.learn(2500)
+# env = Quadrup_env(buffer_length=25,terrain_type=3,terrainHeight=[0,0.05],max_length=500,ray_test=False)
+# model = SAC(policy="MlpPolicy",batch_size=500,learning_rate=1e-4,env=env,verbose=True,)
+# model.learn(2500)
 # # model.save('SAC_tryout')
 # import time as t
 # import matplotlib.pyplot as plt
