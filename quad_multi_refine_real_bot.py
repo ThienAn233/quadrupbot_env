@@ -11,15 +11,15 @@ class Quadrup_env(gym.Env):
     def __init__(
         self,
         max_length      = 500,
-        num_step        = 48,
+        num_step        = 20,
         render_mode     = None,
         debug           = False,
         robot_file      = 'quadrupbot_env//NCKH_AN_and_NHAN//urdf//NCKH_AN_and_NHAN.urdf',
         target_file     = 'quadrupbot_env//target.urdf',
         num_robot       = 1,
-        terrainHeight   = [0., 0.06],
+        terrainHeight   = [0., 0.05],
         seed            = 0,
-        buffer_length   = 5,
+        buffer_length   = 30,
         ray_test        =True,
         terrain_type    = None,
         reference       = True,
@@ -78,7 +78,7 @@ class Quadrup_env(gym.Env):
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 4*self.pi
+        self.T      = 6*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         # w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
@@ -540,7 +540,7 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=30,terrain_type=3,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=30,terrain_type=1,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
 # obs, info = env.reset()
 # for _ in range(5000000):
 #     action = 0.02*np.random.random((env.action_space_))-0.01
@@ -562,7 +562,7 @@ class Quadrup_env(gym.Env):
 # from stable_baselines3 import SAC
 # # # # # Instantiate the env
 # # # # # Define and Train the agent
-# env = Quadrup_env(buffer_length=25,terrain_type=3,terrainHeight=[0,0.05],max_length=500,ray_test=False)
+# env = Quadrup_env(render_mode = 'human',buffer_length=30,terrain_type=1,terrainHeight=[0,0.05],max_length=500,ray_test=False)
 # model = SAC(policy="MlpPolicy",batch_size=500,learning_rate=1e-4,env=env,verbose=True,)
 # model.learn(2500)
 # # model.save('SAC_tryout')
