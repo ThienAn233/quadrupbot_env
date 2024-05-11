@@ -531,10 +531,10 @@ class Quadrup_env(gym.Env):
         surv = 1
         
         # Reward for minimal force
-        force = (-5e-6)*((self.reaction_force[0,:]**2).sum())
+        force = (-5e-7)*((self.reaction_force[0,:]**2).sum())
 
         # Reward for minimal contact force
-        contact =(-1e-5)*((self.contact_force[0,:]**2).sum())
+        contact =(-1e-6)*((self.contact_force[0,:]**2).sum())
         
         return [ align, speed , high, surv, force,  contact]
     
