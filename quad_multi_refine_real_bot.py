@@ -78,7 +78,7 @@ class Quadrup_env(gym.Env):
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 2*self.pi
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         # w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
