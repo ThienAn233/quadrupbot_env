@@ -434,7 +434,7 @@ class Quadrup_env(gym.Env):
             action = .3*action.reshape((1,-1))+.7*self.get_run_gait(self.time_steps_in_current_episode[0])
         else:
             action = action.reshape((1,-1))
-        filtered_action = self.previous_pos*.5 + action*.5
+        filtered_action = self.previous_pos*.7 + action*.3
         self.previous_pos[0] = action
         self.time_steps_in_current_episode = [self.time_steps_in_current_episode[i]+1 for i in range(self.num_robot)]
         for _ in range(self.num_step):
