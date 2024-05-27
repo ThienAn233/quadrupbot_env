@@ -497,9 +497,9 @@ class Quadrup_env(gym.Env):
     
     def get_run_gait(self,t):
         t       = np.array(t).reshape((-1,1))
-        act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/4
+        act1    = self.leg_traj(t+self.T/2,'l')+np.array([0,-0.785,0.785])/4
         act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/4
-        act3    = self.leg_traj(t+self.T/2,'l')+np.array([0,-0.785/2,0.785])/2
+        act3    = self.leg_traj(t,'l')+np.array([0,-0.785/2,0.785])/2
         act4    = self.leg_traj(t,'r')+np.array([0,-0.785/2,0.785])/2
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
