@@ -222,8 +222,8 @@ class Quadrup_env(gym.Env):
             zz = a*(np.cos(b*xx)+np.cos(c*yy)) + np.random.uniform(*self.terrainHeight,(numHeightfieldColumns,numHeightfieldRows))
             self.zz_height[0] = 2*a
         if terrain_type == 2 :
-            a, b, c =  np.random.uniform(0.2,0.6), np.random.uniform(.4,.8), 10*self.terrainHeight[-1]
-            zz = np.round(a*(np.sin(b*xx-np.pi/2)),1)*c
+            a, b, c =  np.random.uniform(2,6), np.random.uniform(.4,.8), self.terrainHeight[-1]
+            zz = np.round(a*(np.sin(b*xx-np.pi/2)))*c
             self.zz_height[0] = -a*c
         if terrain_type == 3 :
             a = np.random.uniform(1.,3.)        # cang lon thi dinh cang lon (so luong bac thang)
@@ -396,7 +396,8 @@ class Quadrup_env(gym.Env):
             self.reset_buffer(client)
             self.time_steps_in_current_episode[0] = 0
             self.previous_pos[0] = np.zeros((len(self.jointId_list)))
-            info = {}
+            r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
+            info = dict(zip(r_name,[0 for i in r_name]))
         return self.obs_buffer[0].flatten().astype('float32'), info
     
     
@@ -570,8 +571,8 @@ class Quadrup_env(gym.Env):
 # plt.ion()
 # r_name = ['align', 'speed', 'high', 'surv', 'force',  'contact']
 # r_show = [[0. for i in range(240)] for i in range(len(r_name)+1)]
-# env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=True,noise =0,terrain_type=3,terrainHeight=[0,0.08],seed=2,max_length=2000,)
-# model = SAC.load('SAC_gym_2024-02-27-06-37-58',device='cpu',print_system_info=True)
+# env = Quadrup_env(render_mode = 'human',buffer_length=5,ray_test=False,noise =0,terrain_type=0,terrainHeight=[0,0.05],seed=2,max_length=2000,)
+# model = SAC.load('SAC_gym_2024-02-27-11-23-48',device='cpu',print_system_info=True)
 # # model = SAC.load('SAC_v3_2024-02-09-14-09-39_500k',device='cpu',print_system_info=True)
 # obs, info = env.reset()
 # while True:
