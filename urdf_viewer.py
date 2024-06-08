@@ -4,11 +4,11 @@ import numpy as np
 import time as t
 
 # Variables
-PATH = 'quadrupbot_env\\quadrup.urdf'
+# PATH = 'quadrupbot_env\\quadrup.urdf'
 # PATH = 'quadrupbot_env\\quadrup_v0.urdf'
-# PATH = 'quadrupbot_env\\quadrup\\urdf\\Model_Doan_HK231_ASM_Dog_URDF.urdf'
+PATH = 'quadrupbot_env\\NCKH_AN_and_NHAN\\urdf\\NCKH_AN_and_NHAN.urdf'
 sleep_time = 1./240.
-initial_height = 1.
+initial_height = 1 #0.17
 initial_ori = [0,0,0,1]
 jointId_list = []
 jointName_list = []
