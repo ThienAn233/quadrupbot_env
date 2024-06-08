@@ -19,7 +19,7 @@
     </collision>
 
     <inertial>
-      <mass value="1."/>
+      <mass value="1.5"/>
       <inertia ixx="0.015"  ixy="0"  ixz="0" iyy="0.015" iyz="0" izz="0.015" />
     </inertial>
   </link>
@@ -50,7 +50,7 @@
   
   <joint name="fl_shoulder_to_base" type="revolute">
     <axis xyz="1 0 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0 0" xyz="0.175 0.1 -0.05"/>
     <parent link="base_link"/>
     <child link="fl_shoulder"/>
@@ -81,7 +81,7 @@
   
   <joint name="fr_shoulder_to_base" type="revolute">
     <axis xyz="1 0 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0 0" xyz="0.175 -0.1 -0.05"/>
     <parent link="base_link"/>
     <child link="fr_shoulder"/>
@@ -112,7 +112,7 @@
   
   <joint name="bl_shoulder_to_base" type="revolute">
     <axis xyz="1 0 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0 0" xyz="-0.175 0.1 -0.05"/>
     <parent link="base_link"/>
     <child link="bl_shoulder"/>
@@ -143,7 +143,7 @@
   
   <joint name="br_shoulder_to_base" type="revolute">
     <axis xyz="1 0 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0 0" xyz="-0.175 -0.1 -0.05"/>
     <parent link="base_link"/>
     <child link="br_shoulder"/>
@@ -152,7 +152,7 @@
   <link name="fl_thigh">
     <visual>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
       <material name="yellow">
@@ -161,7 +161,7 @@
 
     <collision>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
     </collision>
@@ -174,7 +174,7 @@
   
   <joint name="fl_thigh_to_shoulder" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0.785 0" xyz="0 0.025 0"/>
     <parent link="fl_shoulder"/>
     <child link="fl_thigh"/>
@@ -183,7 +183,7 @@
   <link name="fr_thigh">
     <visual>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
       <material name="yellow">
@@ -192,7 +192,7 @@
 
     <collision>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
     </collision>
@@ -205,7 +205,7 @@
   
   <joint name="fr_thigh_to_shoulder" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0.785 0" xyz="0 -0.025 0"/>
     <parent link="fr_shoulder"/>
     <child link="fr_thigh"/>
@@ -214,7 +214,7 @@
   <link name="bl_thigh">
     <visual>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
       <material name="yellow">
@@ -223,7 +223,7 @@
 
     <collision>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.025 -0.075"/>
     </collision>
@@ -236,7 +236,7 @@
   
   <joint name="bl_thigh_to_shoulder" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0.785 0" xyz="0 0.025 0"/>
     <parent link="bl_shoulder"/>
     <child link="bl_thigh"/>
@@ -245,7 +245,7 @@
   <link name="br_thigh">
     <visual>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
       <material name="yellow">
@@ -254,7 +254,7 @@
 
     <collision>
       <geometry>
-        <box size="0.05 0.05 0.15"/>
+        <box size="0.05 0.05 0.08"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.025 -0.075"/>
     </collision>
@@ -267,7 +267,7 @@
   
   <joint name="br_thigh_to_shoulder" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 0.785 0" xyz="0 -0.025 0"/>
     <parent link="br_shoulder"/>
     <child link="br_thigh"/>
@@ -276,7 +276,7 @@
   <link name="fl_bicep">
     <visual>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
       <material name="black">
@@ -294,7 +294,7 @@
 	
     <collision>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
     </collision>
@@ -315,7 +315,7 @@
   
   <joint name="fl_bicep_to_thigh" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 -1.5708 0" xyz="0 0 -0.15"/>
     <parent link="fl_thigh"/>
     <child link="fl_bicep"/>
@@ -324,7 +324,7 @@
   <link name="fr_bicep">
     <visual>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
       <material name="black">
@@ -342,7 +342,7 @@
 	
     <collision>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
     </collision>
@@ -363,7 +363,7 @@
   
   <joint name="fr_bicep_to_thigh" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 -1.5708 0" xyz="0 0 -0.15"/>
     <parent link="fr_thigh"/>
     <child link="fr_bicep"/>
@@ -372,7 +372,7 @@
   <link name="bl_bicep">
     <visual>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
       <material name="black">
@@ -390,7 +390,7 @@
 	
     <collision>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 -0.015 -0.075"/>
     </collision>
@@ -411,7 +411,7 @@
   
   <joint name="bl_bicep_to_thigh" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 -1.5708 0" xyz="0 0 -0.15"/>
     <parent link="bl_thigh"/>
     <child link="bl_bicep"/>
@@ -420,7 +420,7 @@
   <link name="br_bicep">
     <visual>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
       <material name="black">
@@ -438,7 +438,7 @@
 	
     <collision>
       <geometry>
-        <box size="0.03 0.03 0.15"/>
+        <box size="0.03 0.03 0.115"/>
       </geometry>
       <origin rpy="0 0 0" xyz="0 0.015 -0.075"/>
     </collision>
@@ -459,7 +459,7 @@
   
   <joint name="br_bicep_to_thigh" type="revolute">
     <axis xyz="0 1 0"/>
-    <limit effort="11" lower="-0.785" upper="0.785" velocity="2"/>
+    <limit effort="0.9" lower="-0.785" upper="0.785" velocity="2"/>
     <origin rpy="0 -1.5708 0" xyz="0 0 -0.15"/>
     <parent link="br_thigh"/>
     <child link="br_bicep"/>
