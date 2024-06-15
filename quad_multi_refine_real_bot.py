@@ -53,7 +53,7 @@ class Quadrup_env(gym.Env):
         self.initialVel         = [0, .2]
         self.initialMass        = [0, .5]
         self.initialPos         = [0, .3]
-        self.initialFriction    = [2, 5]
+        self.initialFriction    = [0.8, 1.5]
         self.terrainHeight      = terrainHeight
         self.buffer_length      = buffer_length
         self.ray_test           = ray_test
@@ -488,7 +488,7 @@ class Quadrup_env(gym.Env):
         p.addUserDebugPoints(contact,pointColorsRGB=[[1,0,0] for i in range(len(contact))],pointSize=10,replaceItemUniqueId = self.rayId_list,physicsClientId = client)
     
     
-    def leg_traj(self,t,side,mag_thigh = 0.4,mag_bicep=0.8,swing=0.3):
+    def leg_traj(self,t,side,mag_thigh = 0.5,mag_bicep=0.5,swing=0.5):
         if side == 'l':
             return np.hstack([ swing*np.ones_like(t),mag_thigh*np.sin(2*np.pi*t/self.T), mag_bicep*np.cos(2*np.pi*t/self.T)])
         if side == 'r':
@@ -562,7 +562,7 @@ class Quadrup_env(gym.Env):
 # from stable_baselines3 import SAC
 # # # # # Instantiate the env
 # # # # # Define and Train the agent
-# env = Quadrup_env(render_mode = 'human',buffer_length=10,terrain_type=1,terrainHeight=[0,0.05],max_length=500,ray_test=False)
+# env = Quadrup_env(render_mode = 'human',buffer_length=30,terrain_type=1,terrainHeight=[0,0.05],max_length=500,ray_test=False)
 # model = SAC(policy="MlpPolicy",batch_size=500,learning_rate=1e-4,env=env,verbose=True,)
 # model.learn(2500)
 # # model.save('SAC_tryout')
