@@ -11,7 +11,7 @@ class Quadrup_env(gym.Env):
     def __init__(
         self,
         max_length      = 500,
-        num_step        = 20,
+        num_step        = 12,
         render_mode     = None,
         debug           = False,
         robot_file      = 'quadrupbot_env//NCKH_AN_and_NHAN//urdf//NCKH_AN_and_NHAN.urdf',
@@ -272,7 +272,7 @@ class Quadrup_env(gym.Env):
         linear_velo, angular_velo = p.getBaseVelocity(self.robotId,physicsClientId=client)
         linear_velo, angular_velo = np.array(list(linear_velo)+[1]), np.array(list(angular_velo)+[1]) 
         linear_velo, angular_velo = utils.active_rotation(np.array(base_orientation),linear_velo)[:3], utils.active_rotation(np.array(base_orientation),angular_velo)[:3]
-        temp_obs_value += [*linear_velo, *angular_velo]
+        # temp_obs_value += [*linear_velo, *angular_velo]
         self.base_lin_vel[0,:] = linear_velo
         self.base_ang_vel[0,:] = angular_velo
         return temp_obs_value
@@ -382,7 +382,7 @@ class Quadrup_env(gym.Env):
         else: 
             temp_obs_value += [
                             *base_info,
-                            # *joints_info,
+                            *joints_info,
                             # *previous_action,
                             *target_info,
                             ]
@@ -499,8 +499,8 @@ class Quadrup_env(gym.Env):
         t       = np.array(t).reshape((-1,1))
         act1    = self.leg_traj(t,'l')+np.array([0,-0.785,0.785])/4
         act2    = self.leg_traj(t+self.T/2,'r')+np.array([0,-0.785,0.785])/4
-        act3    = self.leg_traj(t+self.T/2,'l')+np.array([0,-0.785/2,0.785])/4
-        act4    = self.leg_traj(t,'r')+np.array([0,-0.785/2,0.785])/4
+        act3    = self.leg_traj(t+self.T/2,'l')+np.array([0,-0.785/2,0.785])/2
+        act4    = self.leg_traj(t,'r')+np.array([0,-0.785/2,0.785])/2
         action  = np.hstack([act1,act2,act3,act4])
         noise = np.random.normal(0,self.noise,action.shape)
         return action+noise
@@ -540,7 +540,7 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=30,terrain_type=1,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=10,terrain_type=1,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
 # obs, info = env.reset()
 # for _ in range(5000000):
 #     action = 0.02*np.random.random((env.action_space_))-0.01
@@ -562,7 +562,7 @@ class Quadrup_env(gym.Env):
 # from stable_baselines3 import SAC
 # # # # # Instantiate the env
 # # # # # Define and Train the agent
-# env = Quadrup_env(render_mode = 'human',buffer_length=30,terrain_type=1,terrainHeight=[0,0.05],max_length=500,ray_test=False)
+# env = Quadrup_env(render_mode = 'human',buffer_length=10,terrain_type=1,terrainHeight=[0,0.05],max_length=500,ray_test=False)
 # model = SAC(policy="MlpPolicy",batch_size=500,learning_rate=1e-4,env=env,verbose=True,)
 # model.learn(2500)
 # # model.save('SAC_tryout')
