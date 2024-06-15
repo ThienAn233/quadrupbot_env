@@ -540,16 +540,16 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=10,terrain_type=1,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
-obs, info = env.reset()
-for _ in range(5000000):
-    action = 0.02*np.random.random((env.action_space_))-0.01
-    print(info)
-    t.sleep(0.05)
-    obs, reward, terminated, truncated, info = env.step(action)
-    if truncated or terminated:
-        obs, inf = env.reset()
-env.close()
+# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=10,terrain_type=1,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
+# obs, info = env.reset()
+# for _ in range(5000000):
+#     action = 0.02*np.random.random((env.action_space_))-0.01
+#     print(info)
+#     t.sleep(0.05)
+#     obs, reward, terminated, truncated, info = env.step(action)
+#     if truncated or terminated:
+#         obs, inf = env.reset()
+# env.close()
 
 # # # ENV CHECK # # #
 # from stable_baselines3.common.env_checker import check_env
