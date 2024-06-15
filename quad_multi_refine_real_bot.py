@@ -53,7 +53,7 @@ class Quadrup_env(gym.Env):
         self.initialVel         = [0, .2]
         self.initialMass        = [0, .5]
         self.initialPos         = [0, .3]
-        self.initialFriction    = [0.8, 1.5]
+        self.initialFriction    = [2, 5]
         self.terrainHeight      = terrainHeight
         self.buffer_length      = buffer_length
         self.ray_test           = ray_test
@@ -61,7 +61,7 @@ class Quadrup_env(gym.Env):
         self.reference          = reference
         self.noise              = noise
         self.terrainScale       = [.05, .05, 1]
-        self.initialHeight      = .17
+        self.initialHeight      = .19
         self.jointId_list       = []
         self.jointName_list     = []
         self.jointRange_list    = []
@@ -78,7 +78,7 @@ class Quadrup_env(gym.Env):
         np.random.seed(self.seed)
         self.g      = (0,0,-9.81) 
         self.pi     = np.pi
-        self.T      = 2*self.pi
+        self.T      = 4*self.pi
         self.time_steps_in_current_episode = [1 for _ in range(self.num_robot)]
         self.vertical       = np.array([0,0,1])
         # w_n                 = np.linspace(0,2*self.pi,self.num_ray+1)[:-1]
@@ -540,16 +540,16 @@ class Quadrup_env(gym.Env):
     
 
 # # # TEST CODE # # #
-# env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=10,terrain_type=1,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
-# obs, info = env.reset()
-# for _ in range(5000000):
-#     action = 0.02*np.random.random((env.action_space_))-0.01
-#     print(info)
-#     t.sleep(0.05)
-#     obs, reward, terminated, truncated, info = env.step(action)
-#     if truncated or terminated:
-#         obs, inf = env.reset()
-# env.close()
+env = Quadrup_env(render_mode = 'human',max_length=500,buffer_length=10,terrain_type=1,seed=1,terrainHeight=[0,0.05],ray_test=False,debug=False)
+obs, info = env.reset()
+for _ in range(5000000):
+    action = 0.02*np.random.random((env.action_space_))-0.01
+    print(info)
+    t.sleep(0.05)
+    obs, reward, terminated, truncated, info = env.step(action)
+    if truncated or terminated:
+        obs, inf = env.reset()
+env.close()
 
 # # # ENV CHECK # # #
 # from stable_baselines3.common.env_checker import check_env
